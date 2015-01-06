@@ -1,0 +1,10 @@
+#board {
+	background-image: url("images/background.png");
+	height:600px;
+	width:1000px;
+	margin: 0 auto;
+}
+#player1.player {
+	width: 400px;
+	margin: 0 auto;
+}
