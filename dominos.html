@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content = "width-device-width,initial-scale-1.0">
+		<link rel ="stylesheet" type ="text/css" href="css/bootstrap.css">
 		<link rel ="stylesheet" type ="text/css" href="dominos.css">
 		<script src = "jquery-1.11.2.js"></script>
 		<script src = "dominos.js"></script>
@@ -14,9 +15,11 @@
 		</div>
 		<div id = "board">
 			<img id = "boardPiece" src = "images/background.png"/>
-			<div id ="notPlaced">
-			</div>
 			<div id = "placed">
+				<div id = "totheLeft">
+				</div>
+				<div id = "totheRight">
+				</div>
 			</div>
 		</div>
 		<div class = "player" id = "player1">
@@ -35,5 +38,14 @@
 			<div id = "hand">
 			</div>
 		</div>
+		<button id ="left" class = "btn btn-primary">
+			Place on the Left
+		</button> 
+		<button id ="right" class = "btn btn-primary">
+			Place on the Right
+		</button>
+		<button id ="wrongMove" class = "btn btn-danger">
+			Wrong Move
+		</button> 
 	</body>
 </html>
