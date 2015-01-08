@@ -40,7 +40,9 @@ var makeDominoImages = function(){
     return dominoImages;
 }
 
-
+Array.prototype.insert = function (index, item) {
+  this.splice(index, 0, item);
+};
 var showCurrentHand = function(currentPlayer,player1,player2,player3,player4){
 	if(currentPlayer == "player1"){
 		player1.show();
@@ -104,39 +106,91 @@ var choseNextPlayer = function(currentPlayer){
 }
 
 
-var pickDirection = function(domino,dominosPlaced){
+var drawBoard = function(idBoard){
+	console.log("Left Side:"+idBoard[0]);
+	console.log("Right Side:" +idBoard[1]);
+}
+
+var pickDirection = function(domino,idBoard){
 	var leftButton = $("#leftButton");
 	var rightButton = $("#rightButton");
 	leftButton.show();
 	rightButton.show();
-	var dominoClone = realDomino.clone();
-	leftButton.click(function(){
-		$("#board #placed").prepend(dominoClone);
-		dominoClone.addClass("left");
-		$(this).hide();
-		rightButton.hide();
-	});
-	rightButton.click(function(){
-		$("#board #placed").append(dominoClone);
-		dominoClone.addClass("right");
-		$(this).hide();
-		leftButton.hide();
-	});
 }
 
-var checkDomino = function(domino,dominosPlaced){
-	var dominosPlaced = $("#board #placed #totheLeft")
-	numberOfDominosPlaced = dominosPlaced.children().size()
-	//The minus 2 is to exclude the two divs to keep track of left and right
-	if(numberOfDominosPlaced == 0){
+var orientIdRight = function(domino,idBoard){
+	var dominoId = domino[0].id;
+	if(idBoard[1].length == 0){
+		return dominoId;
+	}else{
+		var newDominoId = ""
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+		var dominoFirstNumber = dominoId[1];
+		var dominoSecondNumber = dominoId[3];
+		var secondNumber = lastRightDomino[3];
+		if(dominoFirstNumber == secondNumber){
+			return dominoId;
+		}else if(dominoSecondNumber == secondNumber){
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			return newDominoId; 
+		}else{
+			console.log("Houston We have a problem");
+		}
+	};
+}
+
+var addDominoToTheRight = function(domino,idBoard){
+	var dominoId = orientIdRight(domino,idBoard);
+	idBoard[1].push(dominoId);
+	drawBoard(idBoard);
+}
+
+var orientIdLeft = function(domino,idBoard){
+	var dominoId = domino[0].id;
+	if(idBoard[0].length == 0){
+		return dominoId;
+	}else{
+		var newDominoId = ""
+		var lastLeftDomino = idBoard[0][0];
+		var dominoFirstNumber = dominoId[1];
+		var dominoSecondNumber = dominoId[3];
+		var firstNumber = lastLeftDomino[1];
+		if(dominoFirstNumber == firstNumber){
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			return newDominoId;
+		}else if(dominoSecondNumber == firstNumber){
+			return dominoId;
+		}else{
+			console.log("Houston, we have a problem");
+		}
+	};
+}
+
+var addDominoToTheLeft = function(domino,idBoard){
+	var dominoId = orientIdLeft(domino,idBoard);
+	idBoard[0].unshift(dominoId);
+	drawBoard(idBoard);
+}
+
+var addFirstDominoToBoard = function(domino,idBoard){
+	addDominoToTheLeft(domino,idBoard);
+	addDominoToTheRight(domino,idBoard);
+	drawBoard(idBoard);
+}
+
+
+var checkDomino = function(domino,idBoard){
+	if(idBoard[0].length == 0){
 		if(domino[0].id == "(6,6)"){
 			return true;
 		}else{
 			return false;
 		}
 	}else{
-		var lastLeftDomino = $("#board #placed #totheLeft").find("img:last")[0].id
-		var lastRightDomino = $("#board #placed #totheRight").find("img:last")[0].id
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastLeftDomino = idBoard[0][0]; 
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
 		var firstNumber = lastLeftDomino[1];
 		var secondNumber = lastLeftDomino[3];
 		var thirdNumber = lastRightDomino[1];
@@ -181,29 +235,39 @@ var checkDomino = function(domino,dominosPlaced){
 	};
 }
 
-var runGame = function(domino,dominosPlaced,currentPlayer){
-	var validMove = checkDomino(domino,dominosPlaced);
+var validOnlyOnRight = function(domino,idBoard){
+	var numberOfDominosOnRight = idBoard[1].length-1;
+	var lastLeftDomino = idBoard[0][0]; 
+	var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+	
+}
+
+var runGame = function(domino,currentPlayer,idBoard){
+	var validMove = checkDomino(domino,idBoard);
 	if(validMove){
-		var dominosPlaced = $("#board #placed #totheLeft")
-		numberOfDominosPlaced = dominosPlaced.children().size()
-		console.log("numberOfDominosPlaced:" + numberOfDominosPlaced);
-		if(numberOfDominosPlaced == 0){
-			console.log("In here");
-			var dominoClone = domino.clone();
-			var dominoClone2 = domino.clone();
-			$("#board #placed #totheLeft").append(dominoClone);
-			$("#board #placed #totheRight").append(dominoClone2)
-			dominoClone2.hide();
+		domino.unbind("click");
+		if(idBoard[0].length == 0){
+			addFirstDominoToBoard(domino,idBoard);
 			domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
-		 }else{
-		 	pickDirection(domino);
+		 }else if(validOnlyOnRight(domino,idBoard)){
+		 	addDominoToTheRight(domino,idBoard);
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
-		 }
-	}else{
+		 }else if(validOnlyOnLeft(domino,idBoard)){
+		 	addDominoToTheLeft(domino,idBoard);
+		 	domino.remove();
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
+		 }else if(validOnBothEnds(domino,idBoard)){
+		 	pickDirection(domino,idBoard);
+		 	domino.remove();
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
+		 	};
+	};else{
 		wrongMove(currentPlayer);
 		return currentPlayer;
 	};
@@ -266,8 +330,6 @@ var createHands = function(){
 	makeHand("#player3 #hand",dominoImages);
 	makeHand("#player4 #hand",dominoImages);
 }
-
-
 
 var setUpPassButton = function(windowWidth,windowHeight){
 	var passButton = $("#passButton");
@@ -354,6 +416,8 @@ $(document).ready(function(){
 	var player4 = $("#player4");
 	var currentPlayer = ""
 	var dominosPlaced = $("#board #placed");
+	var idBoard = [[],[]];
+	var domino = "";
 	hideHands(player1,player2,player3,player4);
 	startScreen.hover(function(){
 		$(this).hide();
@@ -372,8 +436,8 @@ $(document).ready(function(){
 		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 			console.log("Press a button");
 		}else{
-			var domino = $(this);
-			currentPlayer = runGame(domino,dominosPlaced,currentPlayer);									
+			domino = $(this);
+			currentPlayer = runGame(domino,currentPlayer,idBoard);									
 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
 		};
 	}); 
@@ -383,9 +447,10 @@ $(document).ready(function(){
 		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 			console.log("Press a button");
 		}else{
-			var domino = $(this);
-			currentPlayer = runGame(domino,dominosPlaced,currentPlayer);									
+			domino = $(this);
+			currentPlayer = runGame(domino,currentPlayer,idBoard);									
 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
+			//$(this).unbind("click");
 		};
 	}); 
 	$("#player3 #hand img").click(function(){
@@ -394,9 +459,10 @@ $(document).ready(function(){
 		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 			console.log("Press a button");
 		}else{
-			var domino = $(this);
-			currentPlayer = runGame(domino,dominosPlaced,currentPlayer);									
+			domino = $(this);
+			currentPlayer = runGame(domino,currentPlayer,idBoard);									
 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
+			//$(this).unbind("click");
 		};
 	}); 
 	$("#player4 #hand img").click(function(){
@@ -405,10 +471,23 @@ $(document).ready(function(){
 		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 			console.log("Press a button");
 		}else{
-			var domino = $(this);
-			currentPlayer = runGame(domino,dominosPlaced,currentPlayer);									
+			domino = $(this);
+			currentPlayer = runGame(domino,currentPlayer,idBoard);									
 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
+			//$(this).unbind("click");
 		};
+	});
+	leftButton.click(function(){
+		console.log("Called by LeftButton")
+		addDominoToTheLeft(domino,idBoard);
+		$(this).hide();
+		rightButton.hide();
+	});
+	rightButton.click(function(){
+		console.log("Called by RightButton")
+		addDominoToTheRight(domino,idBoard);
+		$(this).hide();
+		leftButton.hide();
 	});
 });
 
