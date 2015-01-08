@@ -14,7 +14,7 @@ $(document).ready(function(){
 	var player3 = $("#player3");
 	var player4 = $("#player4");
 	var currentPlayer = ""
-	var idBoard = [[],[]];
+	var idBoard = [[],[],[],[]];
 	var domino = "";
 	hideHands(player1,player2,player3,player4);
 	startScreen.hover(function(){
@@ -191,6 +191,7 @@ var makeHand = function(player,dominoImages){
 		if(domino.src == src){
 			player.addClass("first");
 		}
+		scaleDomino(domino);
 		player.append(domino);
 		dominoImages.splice(ranInt,1);
 	}
@@ -199,6 +200,15 @@ var makeHand = function(player,dominoImages){
 
 var randomInt = function(number){
     return Math.floor(Math.random()*number);
+}
+
+var scaleDomino = function(domino){
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	domino.width = dominoWidth;
+	domino.height = dominoHeight;
 }
 
 var setUpStartScreen = function(windowWidth,windowHeight){
@@ -216,6 +226,9 @@ var setUpStartScreenPreesed = function(windowWidth,windowHeight){
 
 var setUpBoard = function(windowWidth,windowHeight){
 	var board = $("#board img");
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var windowHeight = windowHeight - dominoHeight;
 	board.css({"width":windowWidth.toString(),"height":windowHeight.toString()});
 	board.hide();
 	return board;
@@ -225,7 +238,9 @@ var setUpLeftButton = function(windowWidth,windowHeight){
 	var leftButton = $("#leftButton");
 	var width = (windowWidth/4).toString();
 	var height = (windowHeight/3).toString();
-	var top = (windowHeight*.80 - height/2);
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top = (windowHeight*.80 - height/2) - dominoHeight;
 	var left = (windowWidth*.15 - width/2);
 	var fontSize = (windowWidth/35).toString()+"px";
 	leftButton.css({"position": "absolute","fontSize": fontSize, "width": width, "height": height, "top": top, "left": left});
@@ -236,7 +251,9 @@ var setUpRightButton = function(windowWidth,windowHeight){
 	var rightButton = $("#rightButton");
 	var width = (windowWidth/4).toString();
 	var height = (windowHeight/3).toString();
-	var top = (windowHeight*.80 - height/2);
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top = (windowHeight*.80 - height/2) - dominoHeight;
 	var left = (windowWidth*.85 - width/2);
 	var fontSize = (windowWidth/35).toString()+"px";
 	rightButton.css({"position": "absolute","fontSize": fontSize, "width": width, "height": height, "top": top, "left": left});
@@ -248,7 +265,9 @@ var setUpWrongMoveButton = function(windowWidth,windowHeight){
 	var wrongMoveButton = $("#wrongMoveButton");
 	var width = (windowWidth/4).toString();
 	var height =(windowHeight/3).toString();
-	var top =  windowHeight/2 - height/2;
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top =  windowHeight/2 - height/2 - dominoHeight;
 	var left = windowWidth/2 - width/2;
 	var fontSize = (windowWidth/25).toString()+"px";
 	wrongMoveButton.css({"position": "absolute","fontSize": fontSize, "width": width, "height": height, "top": top, "left": left});
@@ -260,13 +279,17 @@ var setUpPassButton = function(windowWidth,windowHeight){
 	var passButton = $("#passButton");
 	var width = (windowWidth/4).toString();
 	var height =(windowHeight/3).toString();
-	var top =  windowHeight/2 - height/2;
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top =  windowHeight/2 - height/2 - dominoHeight;
 	var left = windowWidth/2 - width/2;
 	var fontSize = (windowWidth/25).toString()+"px";
 	passButton.css({"position": "absolute","fontSize": fontSize, "width": width, "height": height, "top": top, "left": left});
 	passButton.hide();
 	return passButton;
 }
+
+
 
 var hideHands = function(player1,player2,player3,player4){
 	player1.hide();
@@ -463,9 +486,11 @@ var orientIdLeft = function(domino,idBoard){
 		var dominoSecondNumber = dominoId[3];
 		var firstNumber = lastLeftDomino[1];
 		if(dominoFirstNumber == firstNumber){
+			idBoard[2].push("90");
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId;
 		}else if(dominoSecondNumber == firstNumber){
+			idBoard[2].push("270");
 			return dominoId;
 		}else{
 			console.log("Houston, we have a problem.We are in orientIdLeft");
@@ -475,7 +500,21 @@ var orientIdLeft = function(domino,idBoard){
 	};
 }
 
+
+var drawRightSide = function(idBoard){
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top =  windowHeight/2 - dominoHeight/2;
+	var left = windowWidth/2 - dominoWidth/2;
+	var rightSide = idBoard[1];
+}
+
+
 var drawBoard = function(idBoard){
+	drawRightSide(idBoard);
+	//drawLeftSide(idBoard);
 	var player1Hand = createArrayOfIds("player1");
 	var player2Hand = createArrayOfIds("player2");
 	var player3Hand = createArrayOfIds("player3");
@@ -506,8 +545,10 @@ var orientIdRight = function(domino,idBoard){
 		var dominoSecondNumber = dominoId[3];
 		var secondNumber = lastRightDomino[3];
 		if(dominoFirstNumber == secondNumber){
+			idBoard[3].push("270");
 			return dominoId;
 		}else if(dominoSecondNumber == secondNumber){
+			idBoard[3].push("90");
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId; 
 		}else{
