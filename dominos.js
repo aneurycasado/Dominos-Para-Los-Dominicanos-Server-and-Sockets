@@ -44,31 +44,35 @@ Array.prototype.insert = function (index, item) {
   this.splice(index, 0, item);
 };
 var showCurrentHand = function(currentPlayer,player1,player2,player3,player4){
-	if(currentPlayer == "player1"){
-		player1.show();
-		player2.hide();
-		player3.hide();
-		player4.hide();
-	}else if(currentPlayer == "player2"){
-		player1.hide();
-		player2.show();
-		player3.hide();
-		player4.hide();
-	}else if(currentPlayer == "player3"){
-		player1.hide();
-		player2.hide();
-		player3.show();
-		player4.hide();
-	}else if(currentPlayer == "player4"){
-		player1.hide();
-		player2.hide();
-		player3.hide();
-		player4.show();
+	if (gameOver()){
+		hideHands(player1,player2,player3,player4);
 	}else{
-		player1.hide();
-		player2.hide();
-		player3.hide();
-		player4.hide();
+		if(currentPlayer == "player1"){
+			player1.show();
+			player2.hide();
+			player3.hide();
+			player4.hide();
+		}else if(currentPlayer == "player2"){
+			player1.hide();
+			player2.show();
+			player3.hide();
+			player4.hide();
+		}else if(currentPlayer == "player3"){
+			player1.hide();
+			player2.hide();
+			player3.show();
+			player4.hide();
+		}else if(currentPlayer == "player4"){
+			player1.hide();
+			player2.hide();
+			player3.hide();
+			player4.show();
+		}else{
+			player1.hide();
+			player2.hide();
+			player3.hide();
+			player4.hide();
+		}
 	}
 }
 
@@ -105,10 +109,41 @@ var choseNextPlayer = function(currentPlayer){
 	};
 }
 
+var gameOverScreen = function(player){
+	console.log(player+ " has won the game congratulations");
+}
+
+var gameOver = function(){
+	var player1Hand = createArrayOfIds("player1");
+	var player2Hand = createArrayOfIds("player2");
+	var player3Hand = createArrayOfIds("player3");
+	var player4Hand = createArrayOfIds("player4");
+	if(player1Hand.length == 0){
+		gameOverScreen("player1");
+		return true;
+	}else if(player2Hand.length == 0){
+		gameOverScreen("player2");
+		return true;
+	}else if(player3Hand.length == 0){
+		gameOverScreen("player3");
+		return true;
+	}else if(player4Hand.length == 0){
+		gameOverScreen("player4");
+		return true; 
+	}
+}
 
 var drawBoard = function(idBoard){
+	var player1Hand = createArrayOfIds("player1");
+	var player2Hand = createArrayOfIds("player2");
+	var player3Hand = createArrayOfIds("player3");
+	var player4Hand = createArrayOfIds("player4");
 	console.log("Left Side:"+idBoard[0]);
 	console.log("Right Side:" +idBoard[1]);
+	console.log("player1Hand:"+player1Hand +"length"+player1Hand.length);
+	console.log("player2Hand:"+player2Hand +"length"+player2Hand.length);
+	console.log("player3Hand:"+player3Hand +"length"+player3Hand.length);
+	console.log("player4Hand:"+player4Hand +"length"+player4Hand.length);
 }
 
 var pickDirection = function(domino,idBoard){
@@ -135,7 +170,9 @@ var orientIdRight = function(domino,idBoard){
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId; 
 		}else{
-			console.log("Houston We have a problem");
+			console.log("Houston We have a problem. We are in orientIdRight");
+			console.log("This is the domino:"+dominoId);
+			drawBoard(idBoard);
 		}
 	};
 }
@@ -162,7 +199,9 @@ var orientIdLeft = function(domino,idBoard){
 		}else if(dominoSecondNumber == firstNumber){
 			return dominoId;
 		}else{
-			console.log("Houston, we have a problem");
+			console.log("Houston, we have a problem.We are in orientIdLeft");
+			console.log("This is the domino:"+dominoId);
+			drawBoard(idBoard);
 		}
 	};
 }
@@ -180,9 +219,9 @@ var addFirstDominoToBoard = function(domino,idBoard){
 }
 
 
-var checkDomino = function(domino,idBoard){
+var checkDomino = function(dominoId,idBoard){
 	if(idBoard[0].length == 0){
-		if(domino[0].id == "(6,6)"){
+		if(dominoId == "(6,6)"){
 			return true;
 		}else{
 			return false;
@@ -192,17 +231,9 @@ var checkDomino = function(domino,idBoard){
 		var lastLeftDomino = idBoard[0][0]; 
 		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
 		var firstNumber = lastLeftDomino[1];
-		var secondNumber = lastLeftDomino[3];
-		var thirdNumber = lastRightDomino[1];
-		var fourthNumber = lastRightDomino[3];
-		var dominoFirstNumber = domino[0].id[1];
-		var dominoSecondNumber = domino[0].id[3];
-		console.log("1:"+firstNumber);
-		console.log("2:"+secondNumber);
-		console.log("3:"+thirdNumber);
-		console.log("4:"+fourthNumber);
-		console.log("5:"+dominoFirstNumber);
-		console.log("6:"+dominoSecondNumber);
+		var secondNumber = lastRightDomino[3];
+		var dominoFirstNumber = dominoId[1];
+		var dominoSecondNumber = dominoId[3];
 		if(dominoFirstNumber  == firstNumber)
 		{
 			console.log("First");
@@ -210,24 +241,12 @@ var checkDomino = function(domino,idBoard){
 		}else if(dominoFirstNumber  == secondNumber){
 			console.log("Second");
 			return true;
-		}else if(dominoFirstNumber  == thirdNumber){
-			console.log("Third");
-			return true;
-		}else if(dominoFirstNumber  == fourthNumber){
-			console.log("Fourth");
-			return true;
 		}else if(dominoSecondNumber == firstNumber){
 			console.log("Fifth");
 			return true;
 		}else if (dominoSecondNumber == secondNumber){
 			console.log("Sixth");
 		   return true;
-		}else if(dominoSecondNumber == thirdNumber){
-			console.log("Seventh");
-			return true;
-		}else if(dominoSecondNumber == fourthNumber){
-			console.log("Eight");
-			return true;
 		}else{
 			console.log("None");
 			return false;
@@ -235,15 +254,36 @@ var checkDomino = function(domino,idBoard){
 	};
 }
 
-var validOnlyOnRight = function(domino,idBoard){
+var validOnlyOnLeft = function(domino,idBoard){
 	var numberOfDominosOnRight = idBoard[1].length-1;
-	var lastLeftDomino = idBoard[0][0]; 
 	var lastRightDomino = idBoard[1][numberOfDominosOnRight];
-	
+	var secondNumber = lastRightDomino[3];
+	var dominoId = domino[0].id;
+	var dominoFirstNumber = dominoId[1];
+	var dominoSecondNumber = dominoId[3];
+	if(dominoFirstNumber != secondNumber && dominoSecondNumber != secondNumber){
+		return true;
+	}else{
+		return false;
+	}; 
+}
+
+var validOnlyOnRight = function(domino,idBoard){
+	var lastLeftDomino = idBoard[0][0]; 
+	var firstNumber = lastLeftDomino[1];
+	var dominoId = domino[0].id;
+	var dominoFirstNumber = dominoId[1];
+	var dominoSecondNumber = dominoId[3];
+	if(dominoFirstNumber != firstNumber && dominoSecondNumber != firstNumber){
+		return true;
+	}else{
+		return false;
+	}; 
 }
 
 var runGame = function(domino,currentPlayer,idBoard){
-	var validMove = checkDomino(domino,idBoard);
+	var dominoId = domino[0].id
+	var validMove = checkDomino(dominoId,idBoard);
 	if(validMove){
 		domino.unbind("click");
 		if(idBoard[0].length == 0){
@@ -261,13 +301,12 @@ var runGame = function(domino,currentPlayer,idBoard){
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
-		 }else if(validOnBothEnds(domino,idBoard)){
+		 }else{
 		 	pickDirection(domino,idBoard);
-		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
-		 	};
-	};else{
+		 };
+	}else{
 		wrongMove(currentPlayer);
 		return currentPlayer;
 	};
@@ -399,6 +438,33 @@ var setUpStartScreen = function(windowWidth,windowHeight){
 	return startScreen;
 }
 
+var createArrayOfIds = function(currentPlayer){
+	var playerString = "#"+currentPlayer+" #hand img"
+	var playerHand = $(playerString);
+	var arrayOfIds = [];
+	playerHand.each(function(index){
+		var domino = $(this);
+		var id = domino.attr('id'); 
+		arrayOfIds.push(id);
+	});
+	return arrayOfIds;
+}
+
+var youCanPlay = function(currentPlayer,idBoard){
+	var arrayOfIds = createArrayOfIds(currentPlayer);
+	if(idBoard[0].length == 0){
+		return true;
+	}else{
+		for(x =0; x<arrayOfIds.length;x++){
+			var dominoId = arrayOfIds[x];
+			if(checkDomino(dominoId,idBoard)){
+				return true;
+			};
+		};
+		return false;
+	}
+}
+
 $(document).ready(function(){
 	createHands();
 	var windowWidth = $(window).width(); 
@@ -432,62 +498,90 @@ $(document).ready(function(){
 	});
 	$("#player1 #hand img").click(function(){
 		if(wrongMoveButton[0].style.display != "none"){
-			console.log("Please press submit")
-		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-			console.log("Press a button");
+			console.log("Please press submit");
 		}else{
-			domino = $(this);
-			currentPlayer = runGame(domino,currentPlayer,idBoard);									
-			showCurrentHand(currentPlayer,player1,player2,player3,player4);
+			if(youCanPlay(currentPlayer,idBoard)){
+				domino = $(this);
+				currentPlayer = runGame(domino,currentPlayer,idBoard);									
+				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+					console.log("Press a button");
+				}else{
+					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+				}
+			}else{
+				passButton.show();
+			};
 		};
 	}); 
 	$("#player2 #hand img").click(function(){
 		if(wrongMoveButton[0].style.display != "none"){
-			console.log("Please press submit")
-		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-			console.log("Press a button");
+			console.log("Please press submit");
 		}else{
-			domino = $(this);
-			currentPlayer = runGame(domino,currentPlayer,idBoard);									
-			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-			//$(this).unbind("click");
+			if(youCanPlay(currentPlayer,idBoard)){
+				domino = $(this);
+				currentPlayer = runGame(domino,currentPlayer,idBoard);									
+				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+					console.log("Press a button");
+				}else{
+					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+				}
+			}else{
+				passButton.show();
+			};
 		};
-	}); 
+	});
 	$("#player3 #hand img").click(function(){
 		if(wrongMoveButton[0].style.display != "none"){
-			console.log("Please press submit")
-		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-			console.log("Press a button");
+			console.log("Please press submit");
 		}else{
-			domino = $(this);
-			currentPlayer = runGame(domino,currentPlayer,idBoard);									
-			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-			//$(this).unbind("click");
+			if(youCanPlay(currentPlayer,idBoard)){
+				domino = $(this);
+				currentPlayer = runGame(domino,currentPlayer,idBoard);									
+				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+					console.log("Press a button");
+				}else{
+					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+				}
+			}else{
+				passButton.show();
+			};
 		};
-	}); 
+	});
 	$("#player4 #hand img").click(function(){
 		if(wrongMoveButton[0].style.display != "none"){
-			console.log("Please press submit")
-		}else if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-			console.log("Press a button");
+			console.log("Please press submit");
 		}else{
-			domino = $(this);
-			currentPlayer = runGame(domino,currentPlayer,idBoard);									
-			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-			//$(this).unbind("click");
+			if(youCanPlay(currentPlayer,idBoard)){
+				domino = $(this);
+				currentPlayer = runGame(domino,currentPlayer,idBoard);									
+				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+					console.log("Press a button");
+				}else{
+					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+				}
+			}else{
+				passButton.show();
+			};
 		};
 	});
 	leftButton.click(function(){
-		console.log("Called by LeftButton")
 		addDominoToTheLeft(domino,idBoard);
+		domino.remove();
 		$(this).hide();
 		rightButton.hide();
+		showCurrentHand(currentPlayer,player1,player2,player3,player4);
 	});
 	rightButton.click(function(){
-		console.log("Called by RightButton")
 		addDominoToTheRight(domino,idBoard);
+		domino.remove();
 		$(this).hide();
 		leftButton.hide();
+		showCurrentHand(currentPlayer,player1,player2,player3,player4);
 	});
+	passButton.click(function(){
+		$(this).hide();
+		currentPlayer = choseNextPlayer(currentPlayer);
+		showCurrentHand(currentPlayer,player1,player2,player3,player4);
+	})
 });
 
