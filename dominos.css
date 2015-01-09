@@ -1,33 +1,43 @@
-#pressed {
+#pressed img{
     display: block;
     margin-left: auto;
-    margin-right: auto; 
+    margin-right: auto;
+    width: 100%; 
 }
 
-#notPressed {
+#notPressed img{
     display: block;
     margin-left: auto;
-    margin-right: auto; 
+    margin-right: auto;
+    width: 100%;  
+}
+
+#board {
+    z-index: 1;
 }
 
 #player1 #hand  {
     text-align:center;
+    width: 100%;
 }
 
 #player2 #hand {
 	text-align:center;
+    width: 100%;
 }
 
 #player3 #hand  {
 	text-align:center;
+    width: 100%;
 }
 
 #player4 #hand {
-	text-align:center; 
+	text-align:center;
+    width: 100%; 
 }
 
 #player1 #hand img  {
-    display: inline-block;
+    display: inline-block;  
 }
 
 #player2 #hand img {

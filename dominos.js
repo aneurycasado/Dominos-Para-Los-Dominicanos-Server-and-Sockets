@@ -1,5 +1,6 @@
 $(document).ready(function(){
-	createHands();
+	var dominoImages = makeDominoImages();
+	createHands(dominoImages);
 	var windowWidth = $(window).width(); 
 	var windowHeight = $(window).height();
 	var startScreen = setUpStartScreen(windowWidth, windowHeight);
@@ -9,12 +10,13 @@ $(document).ready(function(){
 	var rightButton = setUpRightButton(windowWidth,windowHeight);
 	var wrongMoveButton = setUpWrongMoveButton(windowWidth,windowHeight);
 	var passButton = setUpPassButton(windowWidth,windowHeight);
+	var gameOverButton = setUpGameOverButton(windowWidth,windowHeight);
 	var player1 = $("#player1");
 	var player2 = $("#player2");
 	var player3 = $("#player3");
 	var player4 = $("#player4");
 	var currentPlayer = ""
-	var idBoard = [[],[],[],[]];
+	var idBoard = [[],[],[],[],[],[]];
 	var domino = "";
 	hideHands(player1,player2,player3,player4);
 	startScreen.hover(function(){
@@ -37,7 +39,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -58,7 +60,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -79,7 +81,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -100,7 +102,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -113,14 +115,14 @@ $(document).ready(function(){
 		};
 	});
 	leftButton.click(function(){
-		addDominoToTheLeft(domino,idBoard);
+		addDominoToTheLeft(domino,dominoImages,idBoard);
 		domino.remove();
 		$(this).hide();
 		rightButton.hide();
 		showCurrentHand(currentPlayer,player1,player2,player3,player4);
 	});
 	rightButton.click(function(){
-		addDominoToTheRight(domino,idBoard);
+		addDominoToTheRight(domino,dominoImages,idBoard);
 		domino.remove();
 		$(this).hide();
 		leftButton.hide();
@@ -130,11 +132,11 @@ $(document).ready(function(){
 		$(this).hide();
 		currentPlayer = choseNextPlayer(currentPlayer);
 		showCurrentHand(currentPlayer,player1,player2,player3,player4);
-	})
+	});
+
 });
 
-var createHands = function(){
-	var dominoImages = makeDominoImages();
+var createHands = function(dominoImages){
 	makeHand("#player1 #hand",dominoImages);
 	makeHand("#player2 #hand",dominoImages);
 	makeHand("#player3 #hand",dominoImages);
@@ -289,7 +291,19 @@ var setUpPassButton = function(windowWidth,windowHeight){
 	return passButton;
 }
 
-
+var setUpGameOverButton = function(windowWidth,windowHeight){
+	var gameOverButton = $("#gameOverButton");
+	var width = (windowWidth/4).toString();
+	var height =(windowHeight/3).toString();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var top =  windowHeight/2 - height/2 - dominoHeight;
+	var left = windowWidth/2 - width/2;
+	var fontSize = (windowWidth/25).toString()+"px";
+	gameOverButton.css({"position": "absolute","fontSize": fontSize, "width": width, "height": height, "top": top, "left": left});
+	gameOverButton.hide();
+	return gameOverButton;
+}
 
 var hideHands = function(player1,player2,player3,player4){
 	player1.hide();
@@ -433,22 +447,22 @@ var checkDomino = function(dominoId,idBoard){
 	};
 }
 
-var runGame = function(domino,currentPlayer,idBoard){
+var runGame = function(domino,dominoImages,currentPlayer,idBoard){
 	var dominoId = domino[0].id
 	var validMove = checkDomino(dominoId,idBoard);
 	if(validMove){
 		if(idBoard[0].length == 0){
-			addFirstDominoToBoard(domino,idBoard);
+			addFirstDominoToBoard(domino,dominoImages,idBoard);
 			domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
 		 }else if(validOnlyOnRight(domino,idBoard)){
-		 	addDominoToTheRight(domino,idBoard);
+		 	addDominoToTheRight(domino,dominoImages,idBoard);
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
 		 }else if(validOnlyOnLeft(domino,idBoard)){
-		 	addDominoToTheLeft(domino,idBoard);
+		 	addDominoToTheLeft(domino,dominoImages,idBoard);
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
@@ -463,16 +477,16 @@ var runGame = function(domino,currentPlayer,idBoard){
 	};
 }
 
-var addFirstDominoToBoard = function(domino,idBoard){
-	addDominoToTheLeft(domino,idBoard);
-	addDominoToTheRight(domino,idBoard);
-	drawBoard(idBoard);
+var addFirstDominoToBoard = function(domino,dominoImages,idBoard){
+	addDominoToTheLeft(domino,dominoImages,idBoard);
+	addDominoToTheRight(domino,dominoImages,idBoard);
+	drawBoard(idBoard,dominoImages);
 }
 
-var addDominoToTheLeft = function(domino,idBoard){
+var addDominoToTheLeft = function(domino,dominoImages,idBoard){
 	var dominoId = orientIdLeft(domino,idBoard);
 	idBoard[0].unshift(dominoId);
-	drawBoard(idBoard);
+	drawBoard(idBoard,dominoImages);
 }
 
 var orientIdLeft = function(domino,idBoard){
@@ -486,22 +500,21 @@ var orientIdLeft = function(domino,idBoard){
 		var dominoSecondNumber = dominoId[3];
 		var firstNumber = lastLeftDomino[1];
 		if(dominoFirstNumber == firstNumber){
-			idBoard[2].push("90");
+			idBoard[2].unshift("90");
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId;
 		}else if(dominoSecondNumber == firstNumber){
-			idBoard[2].push("270");
+			idBoard[2].unshift("270");
 			return dominoId;
 		}else{
 			console.log("Houston, we have a problem.We are in orientIdLeft");
 			console.log("This is the domino:"+dominoId);
-			drawBoard(idBoard);
+			drawBoard(idBoard,dominoImages);
 		}
 	};
 }
 
-
-var drawRightSide = function(idBoard){
+var drawRightSide = function(idBoard,dominoImages){
 	var windowWidth = $(window).width();
 	var windowHeight = $(window).height();
 	var dominoWidth = (windowWidth/10);
@@ -509,28 +522,60 @@ var drawRightSide = function(idBoard){
 	var top =  windowHeight/2 - dominoHeight/2;
 	var left = windowWidth/2 - dominoWidth/2;
 	var rightSide = idBoard[1];
+	var rightSideOrientation = idBoard[3];
+	for(x = 0; x < rightSide.length; x++){
+		var dominoId = rightSide[x];
+		var orientation = rightSideOrientation[x];
+		console.log("dominoId: " + dominoId);
+		console.log("orientation: " + orientation)
+		if(orientation == "90"){
+			dominoId = dominoId[0] + dominoId[3] + dominoId[2] + dominoId[1] + dominoId[4];
+			console.log("new dominoId: " + dominoId);
+		}
+	}
+}
+
+var drawFirstDomino = function(idBoard,dominoImages){
+	var dominoImages = makeDominoImages();
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var placedDominoWidth = dominoWidth / 2;
+	var placedDominoHeight = 2 * placedDominoWidth;
+	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
+	var leftWide = windowWidth/2 - placedDominoWidth/2 + "px";
+	var domino = dominoImages[27];
+	console.log("dominoImages:" +dominoImages.length)
+	domino.style.width = placedDominoWidth + "px";
+	domino.style.height = placedDominoHeight + "px";
+	domino.style.position = "absolute";
+	domino.style.top = topHeight;
+	domino.style.left = leftWide;
+	var board = $("#board")
+	board.append(domino);
+	idBoard[4].push
 }
 
 
-var drawBoard = function(idBoard){
-	drawRightSide(idBoard);
+var drawBoard = function(idBoard,dominoImages){
+	if(idBoard[0].length == 1){
+		drawFirstDomino(idBoard,dominoImages);
+	}
+	drawRightSide(idBoard,dominoImages);
 	//drawLeftSide(idBoard);
 	var player1Hand = createArrayOfIds("player1");
 	var player2Hand = createArrayOfIds("player2");
 	var player3Hand = createArrayOfIds("player3");
 	var player4Hand = createArrayOfIds("player4");
-	console.log("Left Side:"+idBoard[0]);
-	console.log("Right Side:" +idBoard[1]);
-	console.log("player1Hand:"+player1Hand +"length"+player1Hand.length);
-	console.log("player2Hand:"+player2Hand +"length"+player2Hand.length);
-	console.log("player3Hand:"+player3Hand +"length"+player3Hand.length);
-	console.log("player4Hand:"+player4Hand +"length"+player4Hand.length);
+	console.log("LeftSide:" + idBoard[0]);
+	console.log("RightSide:" + idBoard[1]);
 }
 
-var addDominoToTheRight = function(domino,idBoard){
+var addDominoToTheRight = function(domino,dominoImages,idBoard){
 	var dominoId = orientIdRight(domino,idBoard);
 	idBoard[1].push(dominoId);
-	drawBoard(idBoard);
+	drawBoard(idBoard,dominoImages);
 }
 
 var orientIdRight = function(domino,idBoard){
@@ -552,7 +597,7 @@ var orientIdRight = function(domino,idBoard){
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId; 
 		}else{
-			drawBoard(idBoard);
+			drawBoard(idBoard,dominoImages);
 		}
 	};
 }
@@ -666,7 +711,13 @@ var gameOver = function(){
 }
 
 var gameOverScreen = function(player){
-	console.log(player+ " has won the game congratulations");
+	var gameOverButton = $("#gameOverButton");
+	var text = "Game Over: " + player + " has won"
+	gameOverButton.html(text);
+	gameOverButton.show();
+	gameOverButton.click(function(){
+		window.location.href = "dominos.html"
+	});
 }
 
 
