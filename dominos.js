@@ -1,6 +1,5 @@
 $(document).ready(function(){
-	var dominoImages = makeDominoImages();
-	createHands(dominoImages);
+	createHands();
 	var windowWidth = $(window).width(); 
 	var windowHeight = $(window).height();
 	var startScreen = setUpStartScreen(windowWidth, windowHeight);
@@ -39,7 +38,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -60,7 +59,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -81,7 +80,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -102,7 +101,7 @@ $(document).ready(function(){
 			}else{
 				if(youCanPlay(currentPlayer,idBoard)){
 					domino = $(this);
-					currentPlayer = runGame(domino,dominoImages,currentPlayer,idBoard);									
+					currentPlayer = runGame(domino,currentPlayer,idBoard);									
 					if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
 						console.log("Press a button");
 					}else{
@@ -115,14 +114,14 @@ $(document).ready(function(){
 		};
 	});
 	leftButton.click(function(){
-		addDominoToTheLeft(domino,dominoImages,idBoard);
+		addDominoToTheLeft(domino,idBoard);
 		domino.remove();
 		$(this).hide();
 		rightButton.hide();
 		showCurrentHand(currentPlayer,player1,player2,player3,player4);
 	});
 	rightButton.click(function(){
-		addDominoToTheRight(domino,dominoImages,idBoard);
+		addDominoToTheRight(domino,idBoard);
 		domino.remove();
 		$(this).hide();
 		leftButton.hide();
@@ -136,7 +135,8 @@ $(document).ready(function(){
 
 });
 
-var createHands = function(dominoImages){
+var createHands = function(){
+	var dominoImages = makeDominoImages();
 	makeHand("#player1 #hand",dominoImages);
 	makeHand("#player2 #hand",dominoImages);
 	makeHand("#player3 #hand",dominoImages);
@@ -447,22 +447,22 @@ var checkDomino = function(dominoId,idBoard){
 	};
 }
 
-var runGame = function(domino,dominoImages,currentPlayer,idBoard){
+var runGame = function(domino,currentPlayer,idBoard){
 	var dominoId = domino[0].id
 	var validMove = checkDomino(dominoId,idBoard);
 	if(validMove){
 		if(idBoard[0].length == 0){
-			addFirstDominoToBoard(domino,dominoImages,idBoard);
+			addFirstDominoToBoard(domino,idBoard);
 			domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
 		 }else if(validOnlyOnRight(domino,idBoard)){
-		 	addDominoToTheRight(domino,dominoImages,idBoard);
+		 	addDominoToTheRight(domino,idBoard);
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
 		 }else if(validOnlyOnLeft(domino,idBoard)){
-		 	addDominoToTheLeft(domino,dominoImages,idBoard);
+		 	addDominoToTheLeft(domino,idBoard);
 		 	domino.remove();
 			currentPlayer = choseNextPlayer(currentPlayer);
 			return currentPlayer;
@@ -477,21 +477,22 @@ var runGame = function(domino,dominoImages,currentPlayer,idBoard){
 	};
 }
 
-var addFirstDominoToBoard = function(domino,dominoImages,idBoard){
-	addDominoToTheLeft(domino,dominoImages,idBoard);
-	addDominoToTheRight(domino,dominoImages,idBoard);
-	drawBoard(idBoard,dominoImages);
+var addFirstDominoToBoard = function(domino,idBoard){
+	addDominoToTheLeft(domino,idBoard);
+	addDominoToTheRight(domino,idBoard);
+	drawFirstDomino (idBoard);
 }
 
-var addDominoToTheLeft = function(domino,dominoImages,idBoard){
+var addDominoToTheLeft = function(domino,idBoard){
 	var dominoId = orientIdLeft(domino,idBoard);
 	idBoard[0].unshift(dominoId);
-	drawBoard(idBoard,dominoImages);
+	drawDominoOnLeftSide(domino,idBoard);
 }
 
 var orientIdLeft = function(domino,idBoard){
 	var dominoId = domino[0].id;
 	if(idBoard[0].length == 0){
+		idBoard[2].unshift("center");
 		return dominoId;
 	}else{
 		var newDominoId = ""
@@ -500,42 +501,50 @@ var orientIdLeft = function(domino,idBoard){
 		var dominoSecondNumber = dominoId[3];
 		var firstNumber = lastLeftDomino[1];
 		if(dominoFirstNumber == firstNumber){
-			idBoard[2].unshift("90");
+			domino.addClass("changed");
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId;
 		}else if(dominoSecondNumber == firstNumber){
-			idBoard[2].unshift("270");
+			domino.addClass("notChanged");
 			return dominoId;
 		}else{
-			console.log("Houston, we have a problem.We are in orientIdLeft");
-			console.log("This is the domino:"+dominoId);
-			drawBoard(idBoard,dominoImages);
+			console.log("Houston, we have a problem.");
 		}
 	};
 }
 
-var drawRightSide = function(idBoard,dominoImages){
-	var windowWidth = $(window).width();
-	var windowHeight = $(window).height();
-	var dominoWidth = (windowWidth/10);
-	var dominoHeight = 2*dominoWidth;
-	var top =  windowHeight/2 - dominoHeight/2;
-	var left = windowWidth/2 - dominoWidth/2;
-	var rightSide = idBoard[1];
-	var rightSideOrientation = idBoard[3];
-	for(x = 0; x < rightSide.length; x++){
-		var dominoId = rightSide[x];
-		var orientation = rightSideOrientation[x];
-		console.log("dominoId: " + dominoId);
-		console.log("orientation: " + orientation)
-		if(orientation == "90"){
-			dominoId = dominoId[0] + dominoId[3] + dominoId[2] + dominoId[1] + dominoId[4];
-			console.log("new dominoId: " + dominoId);
-		}
-	}
+var addDominoToTheRight = function(domino,idBoard){
+	var dominoId = orientIdRight(domino,idBoard);
+	idBoard[1].push(dominoId);
+	drawDominoOnRightSide(domino,idBoard);
 }
 
-var drawFirstDomino = function(idBoard,dominoImages){
+var orientIdRight = function(domino,idBoard){
+	var dominoId = domino[0].id;
+	if(idBoard[1].length == 0){
+		idBoard[3].push("center");
+		return dominoId;
+	}else{
+		var newDominoId = ""
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+		var dominoFirstNumber = dominoId[1];
+		var dominoSecondNumber = dominoId[3];
+		var secondNumber = lastRightDomino[3];
+		if(dominoFirstNumber == secondNumber){
+			domino.addClass("notChanged");
+			return dominoId;
+		}else if(dominoSecondNumber == secondNumber){
+			domino.addClass("changed");
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			return newDominoId; 
+		}else{
+			console.log("Houston, we have a problem.");
+		}
+	};
+}
+
+var drawFirstDomino = function(idBoard){
 	var dominoImages = makeDominoImages();
 	var windowWidth = $(window).width();
 	var windowHeight = $(window).height();
@@ -546,7 +555,6 @@ var drawFirstDomino = function(idBoard,dominoImages){
 	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
 	var leftWide = windowWidth/2 - placedDominoWidth/2 + "px";
 	var domino = dominoImages[27];
-	console.log("dominoImages:" +dominoImages.length)
 	domino.style.width = placedDominoWidth + "px";
 	domino.style.height = placedDominoHeight + "px";
 	domino.style.position = "absolute";
@@ -554,52 +562,249 @@ var drawFirstDomino = function(idBoard,dominoImages){
 	domino.style.left = leftWide;
 	var board = $("#board")
 	board.append(domino);
-	idBoard[4].push
 }
 
-
-var drawBoard = function(idBoard,dominoImages){
-	if(idBoard[0].length == 1){
-		drawFirstDomino(idBoard,dominoImages);
-	}
-	drawRightSide(idBoard,dominoImages);
-	//drawLeftSide(idBoard);
-	var player1Hand = createArrayOfIds("player1");
-	var player2Hand = createArrayOfIds("player2");
-	var player3Hand = createArrayOfIds("player3");
-	var player4Hand = createArrayOfIds("player4");
-	console.log("LeftSide:" + idBoard[0]);
-	console.log("RightSide:" + idBoard[1]);
-}
-
-var addDominoToTheRight = function(domino,dominoImages,idBoard){
-	var dominoId = orientIdRight(domino,idBoard);
-	idBoard[1].push(dominoId);
-	drawBoard(idBoard,dominoImages);
-}
-
-var orientIdRight = function(domino,idBoard){
-	var dominoId = domino[0].id;
-	if(idBoard[1].length == 0){
-		return dominoId;
-	}else{
-		var newDominoId = ""
-		var numberOfDominosOnRight = idBoard[1].length-1;
-		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
-		var dominoFirstNumber = dominoId[1];
-		var dominoSecondNumber = dominoId[3];
-		var secondNumber = lastRightDomino[3];
-		if(dominoFirstNumber == secondNumber){
-			idBoard[3].push("270");
-			return dominoId;
-		}else if(dominoSecondNumber == secondNumber){
-			idBoard[3].push("90");
-			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
-			return newDominoId; 
-		}else{
-			drawBoard(idBoard,dominoImages);
+var drawDominoOnRightSide = function(domino,idBoard){
+	if(idBoard[1].length > 1){
+		var dominoImages = makeDominoImages();
+		var dominoImage = "";
+		var windowWidth = $(window).width();
+		var windowHeight = $(window).height();
+		var dominoWidth = (windowWidth/10);
+		var dominoHeight = 2*dominoWidth;
+		var placedDominoWidth = dominoWidth / 2;
+		var placedDominoHeight = 2 * placedDominoWidth;
+		var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
+		var leftWide = windowWidth/2 - placedDominoWidth/2;
+		var rightSide = idBoard[1];
+		var rightSideOrientation = idBoard[3];
+		var board = $("#board");
+		var scalers = []
+		for(x = 0; x < rightSide.length; x++){
+			var currentDominoId = rightSide[x]
+			if(currentDominoId[1] == currentDominoId[3]){
+				scalers.push(1)
+			}else{
+				scalers.push(2)
+			}
 		}
-	};
+		var dominoId = domino[0].id
+		var rightSideLength = rightSide.length
+		var orientation = rightSideOrientation[rightSideLength-1];
+		for(y = 0; y < dominoImages.length; y++){
+			var dominoImageId = dominoImages[y].id;
+			if(dominoId == dominoImageId){
+				dominoImage = dominoImages[y];
+			}
+		}
+		dominoImage.style.width = placedDominoWidth + "px";
+		dominoImage.style.height = placedDominoHeight + "px";
+		dominoImage.style.position = "absolute";
+		dominoImage.style.top = topHeight;
+		var adjuster = 0;
+		for(x=1;x<scalers.length;x++){
+			var newWide = scalers[x]*placedDominoWidth;
+			adjuster += newWide;
+		}
+		var newLeft = leftWide + adjuster - placedDominoWidth/2;
+		if(domino.hasClass("changed")){
+			if(dominoId[1] != dominoId[3]){
+				dominoImage.className = "rotated90";
+			}else{
+				newLeft = leftWide + adjuster
+			}
+		}else if(domino.hasClass("notChanged")){
+			if(dominoId[1] != dominoId[3]){
+				dominoImage.className = "rotate270";
+			}else{
+				newLeft = leftWide + adjuster
+			}
+		}
+		if(dominoId[1] != dominoId[3]){
+			if(newLeft + placedDominoHeight > windowWidth ){
+				console.log("Greater than windowWidth not double");
+			}else{
+				dominoImage.style.left = newLeft + "px";
+				board.append(dominoImage);
+			}
+		}else{
+			if(newLeft + placedDominoWidth > windowWidth){
+				console.log("Greater than windowWidth double")
+			}else{
+				dominoImage.style.left = newLeft + "px";
+				board.append(dominoImage);
+			}
+		}
+	}
+}
+
+
+var drawDominoOnLeftSide = function(domino,idBoard){
+	if(idBoard[0].length > 1){
+		var dominoImages = makeDominoImages();
+		var dominoImage = "";
+		var windowWidth = $(window).width();
+		var windowHeight = $(window).height();
+		var dominoWidth = (windowWidth/10);
+		var dominoHeight = 2*dominoWidth;
+		var placedDominoWidth = dominoWidth / 2;
+		var placedDominoHeight = 2 * placedDominoWidth;
+		var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
+		var leftWide = windowWidth/2 - placedDominoWidth/2;
+		var leftSide = idBoard[0];
+		var leftSideOrientation = idBoard[2];
+		var board = $("#board");
+		var scalers = []
+		for(x = leftSide.length-1; x > -1; x--){
+			var currentDominoId = leftSide[x]
+			if(currentDominoId[1] == currentDominoId[3]){
+				scalers.push(1)
+			}else{
+				scalers.push(2)
+			}
+		}
+		var dominoId = domino[0].id
+		var leftSideLength = leftSide.length
+		var orientation = leftSideOrientation[leftSideLength-1];
+		for(y = 0; y < dominoImages.length; y++){
+			var dominoImageId = dominoImages[y].id;
+			if(dominoId == dominoImageId){
+				dominoImage = dominoImages[y];
+			}
+		}
+		dominoImage.style.width = placedDominoWidth + "px";
+		dominoImage.style.height = placedDominoHeight + "px";
+		dominoImage.style.position = "absolute";
+		dominoImage.style.top = topHeight;
+		var adjuster = 0;
+		for(x=1;x<scalers.length;x++){
+			var newWide = scalers[x]*placedDominoWidth;
+			adjuster += newWide;
+		}
+		var newLeft = leftWide - adjuster + placedDominoWidth/2;
+		console.log("New Left in drawLeft after scaler:" + newLeft);
+		if(domino.hasClass("changed")){
+			if(dominoId[1] != dominoId[3]){
+				dominoImage.className = "rotated90";
+			}else{
+				newLeft = leftWide - adjuster 
+			}
+		}else if(domino.hasClass("notChanged")){
+			if(dominoId[1] != dominoId[3]){
+				dominoImage.className = "rotate270";
+			}else{
+				newLeft = leftWide - adjuster
+			}
+		}
+		if(dominoId[1] != dominoId[3]){
+			if(newLeft - (placedDominoHeight/2) < 0 ){
+				console.log("Less than windowWidth not double");
+				var dominosOnLeft = scalers.length;
+				newLeft = newLeft + placedDominoHeight
+				console.log("New Left in drawLeft before down:" + newLeft);
+				drawDominoDown(domino,idBoard,newLeft,dominosOnLeft);
+			}else{
+				dominoImage.style.left = newLeft + "px";
+				board.append(dominoImage);
+			}
+		}else{
+			if(newLeft - (placedDominoWidth/2) < 0){
+				console.log("Less than windowWidth double");
+				var dominosOnLeft = scalers.length;
+				newLeft = newLeft + placedDominoWidth
+				console.log("New Left in drawLeft before down:" + newLeft);
+				drawDominoDown(domino,idBoard,newLeft,dominosOnLeft);
+			}else{
+				dominoImage.style.left = newLeft + "px";
+				board.append(dominoImage);
+			}
+		}
+	}
+}
+
+var drawDominoDown = function(domino,idBoard,newLeft,dominosOnLeft){
+	console.log("In drawDominoDown");
+	console.log("newLeft in beginning drawDominoDown:" + newLeft);
+	var dominoImages = makeDominoImages();
+	var dominoImage = "";
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var placedDominoWidth = dominoWidth / 2;
+	var placedDominoHeight = 2 * placedDominoWidth;
+	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight);
+	var leftWide = newLeft;
+	var leftSide = idBoard[0];
+	var board = $("#board");
+	var scalers = []
+	var question = leftSide.length - dominosOnLeft 
+	console.log("This should be zero:" + question); 
+	for(x = (leftSide.length - dominosOnLeft); x > -1; x--){
+		var currentDominoId = leftSide[x]
+		console.log("currentDominoId:" + currentDominoId)
+		if(currentDominoId[1] == currentDominoId[3]){
+			scalers.push(.5)
+		}else{
+			scalers.push(1)
+		}
+	}
+	var dominoId = domino[0].id
+	var leftSideLength = leftSide.length  
+	for(y = 0; y < dominoImages.length; y++){
+		var dominoImageId = dominoImages[y].id;
+		if(dominoId == dominoImageId){
+			dominoImage = dominoImages[y];
+		}
+	}
+	dominoImage.style.width = placedDominoWidth + "px";
+	dominoImage.style.height = placedDominoHeight + "px";
+	dominoImage.style.position = "absolute";
+	console.log("newLeft before being set drawDominoDown:" + newLeft);
+	dominoImage.style.left = leftWide - placedDominoWidth/2 + "px";
+	var adjuster = 0;
+	console.log("Here are the scalers:" + scalers);
+	for(x=0;x<scalers.length;x++){
+		var newHeight = scalers[x]*placedDominoHeight;
+		adjuster += newHeight;
+	}
+	console.log("adujuster:" + adjuster);
+	var newTop = topHeight + adjuster;
+	console.log("newTop:" + newTop);
+	if(domino.hasClass("changed")){
+		if(dominoId[1] != dominoId[3]){
+			console.log("Do not rotate");
+			dominoImage.className = "none";
+		}
+	}else{
+		if(dominoId[1] != dominoId[3]){
+			console.log('rotate180');
+			dominoImage.className = "rotate180";
+		}else{
+			console.log('rotate90');
+			dominoImage.className = "rotated90";
+		}
+	}
+	console.log("Made it to here");
+	console.log("This is the dominoImage so far")
+	console.log(dominoImage);
+	if(dominoId[1] != dominoId[3]){
+		if(newTop > windowHeight ){
+			console.log("Greater than window Height not double");
+		}else{
+			console.log("This is the newTop in the end: " +newTop);
+			dominoImage.style.top = newTop - placedDominoWidth/2  + "px";
+			board.append(dominoImage);
+		}
+	}else{
+		if(newTop > windowHeight){
+			console.log("Greater than window height double");
+		}else{
+			console.log("This is the newTop in the end: " +newTop);
+			dominoImage.style.top = newTop + "px";
+			board.append(dominoImage);
+		}
+	}
 }
 
 
