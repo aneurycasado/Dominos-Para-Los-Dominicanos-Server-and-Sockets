@@ -617,15 +617,27 @@ var drawDominoOnRightSide = function(domino,idBoard){
 			}
 		}
 		if(dominoId[1] != dominoId[3]){
+			console.log("Not a double and time to drawUp");
 			if(newLeft + placedDominoHeight > windowWidth ){
-				console.log("Greater than windowWidth not double");
+				var dominosOnRight = rightSideLength
+				if(idBoard[3].length == 0){
+					idBoard[3].push(dominosOnRight)
+					idBoard[3].push(newLeft)
+				}
+				drawDominosUp(domino,idBoard)
 			}else{
 				dominoImage.style.left = newLeft + "px";
 				board.append(dominoImage);
 			}
 		}else{
 			if(newLeft + placedDominoWidth > windowWidth){
-				console.log("Greater than windowWidth double")
+				console.log("A double and time to drawUp")
+				var dominosOnRight = rightSideLength
+				if(idBoard[3].length == 0){
+					idBoard[3].push(dominosOnRight)
+					idBoard[3].push(newLeft)
+				}
+				drawDominosUp(domino,idBoard)
 			}else{
 				dominoImage.style.left = newLeft + "px";
 				board.append(dominoImage);
@@ -747,6 +759,93 @@ var createAdjuster = function(scalers,placedDominoWidth){
 }
 
 
+var drawDominosUp = function(domino,idBoard){
+	console.log("In drawDominoUp")
+	var newLeft = idBoard[3][1]
+	console.log("newLeft in beginning drawDominoUp:" + newLeft);
+	var dominoImages = makeDominoImages();
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var placedDominoWidth = dominoWidth / 2;
+	var placedDominoHeight = 2 * placedDominoWidth;
+	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight);
+	var leftWide = newLeft;
+	var rightSide = idBoard[1];
+	var board = $("#board");
+	var dominosOnRight = idBoard[3][0]
+	var scalers = createScalersUp(rightSide,dominosOnRight)
+	var dominoId = domino[0].id
+	var rightSideLength = rightSide.length
+	var dominoImage = findDominoImage(dominoId,dominoImages)
+	dominoImage.style.width = placedDominoWidth + "px";
+	dominoImage.style.height = placedDominoHeight + "px";
+	dominoImage.style.position = "absolute";
+	dominoImage.style.left = newLeft - placedDominoWidth/2 + "px"
+	var adjuster = createAdjusterUp(scalers,placedDominoHeight)
+	var newTop = topHeight - adjuster;
+	if(domino.hasClass("changed")){
+		if(dominoId[1] != dominoId[3]){
+			console.log("This is the domino")
+			console.log("Do not rotate");
+			dominoImage.className = "none";
+		}else{
+			console.log("Problem"+dominoId)
+			dominoImage.className = "rotated90";
+		}
+	}else{
+		if(dominoId[1] != dominoId[3]){
+			console.log('rotate180');
+			dominoImage.className = "rotate180";
+		}else{
+			console.log('rotate90');
+			dominoImage.className = "rotated90";
+		}
+	}
+	if(dominoId[1] != dominoId[3]){
+		if(newTop < 0 ){
+			console.log("Less than zero and not a double")
+		}else{
+			dominoImage.style.top = newTop + placedDominoWidth/2  + "px";
+			board.append(dominoImage);
+		}
+	}else{
+		if(newTop < 0){
+			console.log("Less than zero and a double");
+		}else{
+			console.log("This is the newTop in the end: " +newTop);
+			dominoImage.style.top = newTop + "px";
+			board.append(dominoImage);
+		}
+	}
+
+}
+
+var createScalersUp = function(rightSide,dominosOnRight){
+	var scalers = []
+	var length = rightSide.length - dominosOnRight
+	for(x = length; x > -1; x--){
+		var currentDominoId = rightSide[x]
+		if(currentDominoId[1] == currentDominoId[3]){
+			scalers.push(.5)
+		}else{
+			scalers.push(1)
+		}
+	}
+	return scalers
+}
+
+var createAdjusterUp = function(scalers,placedDominoHeight){
+	adjuster = 0
+	for(x=0;x<scalers.length;x++){
+		var newHeight = scalers[x]*placedDominoHeight;
+		adjuster += newHeight;
+	}
+	return adjuster
+}
+
+
 var drawDominoDown = function(domino,idBoard){
 	console.log("In drawDominoDown");
 	var newLeft = idBoard[2][1]
@@ -775,8 +874,12 @@ var drawDominoDown = function(domino,idBoard){
 	var newTop = topHeight + adjuster;
 	if(domino.hasClass("changed")){
 		if(dominoId[1] != dominoId[3]){
+			console.log("This is the domino")
 			console.log("Do not rotate");
 			dominoImage.className = "none";
+		}else{
+			console.log("Problem"+dominoId)
+			dominoImage.className = "rotated90";
 		}
 	}else{
 		if(dominoId[1] != dominoId[3]){
