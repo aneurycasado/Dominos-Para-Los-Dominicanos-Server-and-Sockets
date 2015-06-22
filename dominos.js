@@ -486,7 +486,9 @@ var addFirstDominoToBoard = function(domino,idBoard){
 var addDominoToTheLeft = function(domino,idBoard){
 	var dominoId = orientIdLeft(domino,idBoard);
 	idBoard[0].unshift(dominoId);
-	drawDominoOnLeftSide(domino,idBoard);
+	if(idBoard[0].length > 1){
+		drawDominoOnLeftSide(domino,idBoard);
+	}
 }
 
 var orientIdLeft = function(domino,idBoard){
@@ -515,7 +517,9 @@ var orientIdLeft = function(domino,idBoard){
 var addDominoToTheRight = function(domino,idBoard){
 	var dominoId = orientIdRight(domino,idBoard);
 	idBoard[1].push(dominoId);
-	drawDominoOnRightSide(domino,idBoard);
+	if(idBoard[1].length > 1){
+		drawDominoOnRightSide(domino,idBoard);
+	}
 }
 
 var orientIdRight = function(domino,idBoard){
@@ -542,6 +546,7 @@ var orientIdRight = function(domino,idBoard){
 	};
 }
 
+//Drawing the board
 
 var drawFirstDomino = function(idBoard){
 	var dominoImages = makeDominoImages();
@@ -553,80 +558,75 @@ var drawFirstDomino = function(idBoard){
 	var placedDominoHeight = 2 * placedDominoWidth;
 	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
 	var leftWide = windowWidth/2 - placedDominoWidth/2 + "px";
-	var domino = dominoImages[27];
-	domino.style.width = placedDominoWidth + "px";
-	domino.style.height = placedDominoHeight + "px";
-	domino.style.position = "absolute";
-	domino.style.top = topHeight;
-	domino.style.left = leftWide;
+	var dominoImage = dominoImages[27];
+	dominoImage.style.width = placedDominoWidth + "px";
+	dominoImage.style.height = placedDominoHeight + "px";
+	dominoImage.style.position = "absolute";
+	dominoImage.style.top = topHeight;
+	dominoImage.style.left = leftWide;
 	var board = $("#board")
-	board.append(domino);
+	board.append(dominoImage);
 }
 
 var drawDominoOnRightSide = function(domino,idBoard){
-	if(idBoard[1].length > 1){
-		var dominoImages = makeDominoImages();
-		var dominoImage = "";
-		var windowWidth = $(window).width();
-		var windowHeight = $(window).height();
-		var dominoWidth = (windowWidth/10);
-		var dominoHeight = 2*dominoWidth;
-		var placedDominoWidth = dominoWidth / 2;
-		var placedDominoHeight = 2 * placedDominoWidth;
-		var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
-		var leftWide = windowWidth/2 - placedDominoWidth/2;
-		var rightSide = idBoard[1];
-		var board = $("#board");
-		var scalers = createScalersRight(rightSide)
-		var dominoId = domino[0].id
-		var rightSideLength = rightSide.length
-		var dominoImage = findDominoImage(dominoId,dominoImages)
-		dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight)
-		var adjuster = createAdjusterRight(scalers,placedDominoWidth);
-		var newLeft = leftWide + adjuster - placedDominoWidth/2;
-		if(domino.hasClass("changed")){
-			if(dominoId[1] != dominoId[3]){
-				dominoImage.className = "rotated90";
-			}else{
-				newLeft = leftWide + adjuster
-			}
-		}else if(domino.hasClass("notChanged")){
-			if(dominoId[1] != dominoId[3]){
-				dominoImage.className = "rotate270";
-			}else{
-				newLeft = leftWide + adjuster
-			}
-		}
+	var dominoImages = makeDominoImages();
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var placedDominoWidth = dominoWidth / 2;
+	var placedDominoHeight = 2 * placedDominoWidth;
+	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
+	var leftWide = windowWidth/2 - placedDominoWidth/2;
+	var rightSide = idBoard[1];
+	var board = $("#board");
+	var scalers = createScalersRight(rightSide)
+	var dominoId = domino[0].id
+	var rightSideLength = rightSide.length
+	var dominoImage = findDominoImage(dominoId,dominoImages)
+	dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight)
+	var adjuster = createAdjusterRight(scalers,placedDominoWidth);
+	var newLeft = leftWide + adjuster - placedDominoWidth/2;
+	if(domino.hasClass("changed")){
 		if(dominoId[1] != dominoId[3]){
-			if(newLeft + placedDominoHeight > windowWidth ){
-				var dominosOnRight = rightSideLength
-				var lastDominoOnRight = rightSide[rightSideLength-2]
-				if(idBoard[3].length == 0){
-					idBoard[3].push(dominosOnRight)
-					idBoard[3].push(newLeft)
-					idBoard[3].push(lastDominoOnRight)
-				}
-				drawDominosUp(domino,idBoard)
-			}else{
-				dominoImage.style.left = newLeft + "px";
-				board.append(dominoImage);
-			}
+			dominoImage.className = "rotated90";
 		}else{
-			if(newLeft + placedDominoWidth > windowWidth){
-				console.log("A double and time to drawUp")
-				var dominosOnRight = rightSideLength
-				var lastDominoOnRight = rightSide[rightSideLength-2]
-				if(idBoard[3].length == 0){
-					idBoard[3].push(dominosOnRight)
-					idBoard[3].push(newLeft)
-					idBoard[3].push(lastDominoOnRight)
-				}
-				drawDominosUp(domino,idBoard)
-			}else{
-				dominoImage.style.left = newLeft + "px";
-				console.log(dominoImage.style.top)
-				board.append(dominoImage);
+			newLeft = leftWide + adjuster
+		}
+	}else if(domino.hasClass("notChanged")){
+		if(dominoId[1] != dominoId[3]){
+			dominoImage.className = "rotate270";
+		}else{
+			newLeft = leftWide + adjuster
+		}
+	}
+	if(dominoId[1] != dominoId[3]){
+		if(newLeft + placedDominoHeight > windowWidth){
+			var dominosOnRight = rightSideLength
+			var lastDominoOnRight = rightSide[rightSideLength-2]
+			if(idBoard[3].length == 0){
+				idBoard[3].push(dominosOnRight)
+				idBoard[3].push(newLeft)
+				idBoard[3].push(lastDominoOnRight)
 			}
+			drawDominosUp(domino,idBoard)
+		}else{
+			dominoImage.style.left = newLeft + "px";
+			board.append(dominoImage);
+		}
+	}else{
+		if(newLeft + placedDominoWidth > windowWidth){
+			var dominosOnRight = rightSideLength
+			var lastDominoOnRight = rightSide[rightSideLength-2]
+			if(idBoard[3].length == 0){
+				idBoard[3].push(dominosOnRight)
+				idBoard[3].push(newLeft)
+				idBoard[3].push(lastDominoOnRight)
+			}
+			drawDominosUp(domino,idBoard)
+		}else{
+			dominoImage.style.left = newLeft + "px";
+			board.append(dominoImage);
 		}
 	}
 }
@@ -830,68 +830,66 @@ var createAdjusterLeftAgain = function(scalers,placedDominoWidth){
 }
 
 var drawDominoOnLeftSide = function(domino,idBoard){
-	if(idBoard[0].length > 1){
-		var dominoImages = makeDominoImages();
-		var windowWidth = $(window).width();
-		var windowHeight = $(window).height();
-		var dominoWidth = (windowWidth/10);
-		var dominoHeight = 2*dominoWidth;
-		var placedDominoWidth = dominoWidth / 2;
-		var placedDominoHeight = 2 * placedDominoWidth;
-		var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
-		var leftWide = windowWidth/2 - placedDominoWidth/2;
-		var leftSide = idBoard[0];
-		var board = $("#board");
-		var scalers = createScalersLeft(leftSide)
-		var dominoId = domino[0].id
-		var leftSideLength = leftSide.length
-		var dominoImage = findDominoImage(dominoId,dominoImages)
-		dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight)
-		var adjuster = createAdjusterLeft(scalers,placedDominoWidth)
-		var newLeft = leftWide - adjuster + placedDominoWidth/2;
-		if(domino.hasClass("changed")){
-			if(dominoId[1] != dominoId[3]){
-				dominoImage.className = "rotated90";
-			}else{
-				newLeft = leftWide - adjuster
-			}
-		}else if(domino.hasClass("notChanged")){
-			if(dominoId[1] != dominoId[3]){
-				dominoImage.className = "rotate270";
-			}else{
-				newLeft = leftWide - adjuster
-			}
-		}
+	var dominoImages = makeDominoImages();
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var dominoWidth = (windowWidth/10);
+	var dominoHeight = 2*dominoWidth;
+	var placedDominoWidth = dominoWidth / 2;
+	var placedDominoHeight = 2 * placedDominoWidth;
+	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
+	var leftWide = windowWidth/2 - placedDominoWidth/2;
+	var leftSide = idBoard[0];
+	var board = $("#board");
+	var scalers = createScalersLeft(leftSide)
+	var dominoId = domino[0].id
+	var leftSideLength = leftSide.length
+	var dominoImage = findDominoImage(dominoId,dominoImages)
+	dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight)
+	var adjuster = createAdjusterLeft(scalers,placedDominoWidth)
+	var newLeft = leftWide - adjuster + placedDominoWidth/2;
+	if(domino.hasClass("changed")){
 		if(dominoId[1] != dominoId[3]){
-			if(newLeft - (placedDominoHeight/2) < 0){
-				var dominosOnLeft = scalers.length;
-				var lastDominoOnLeft = leftSide[1]
-				newLeft = newLeft + placedDominoHeight/2
-				if(idBoard[2].length == 0){
-					idBoard[2].push(dominosOnLeft)
-					idBoard[2].push(newLeft)
-					idBoard[2].push(lastDominoOnLeft)
-				}
-				drawDominoDown(domino,idBoard);
-			}else{
-				dominoImage.style.left = newLeft + "px";
-				board.append(dominoImage);
-			}
+			dominoImage.className = "rotated90";
 		}else{
-			if(newLeft - (placedDominoWidth/2) < 0){
-				var dominosOnLeft = scalers.length;
-				var lastDominoOnLeft = leftSide[1]
-				newLeft = newLeft + placedDominoWidth
-				if(idBoard[2].length == 0){
-					idBoard[2].push(dominosOnLeft)
-					idBoard[2].push(newLeft)
-					idBoard[2].push(lastDominoOnLeft)
-				}
-				drawDominoDown(domino,idBoard);
-			}else{
-				dominoImage.style.left = newLeft + "px";
-				board.append(dominoImage);
+			newLeft = leftWide - adjuster
+		}
+	}else if(domino.hasClass("notChanged")){
+		if(dominoId[1] != dominoId[3]){
+			dominoImage.className = "rotate270";
+		}else{
+			newLeft = leftWide - adjuster
+		}
+	}
+	if(dominoId[1] != dominoId[3]){
+		if(newLeft - (placedDominoHeight/2) < 0){
+			var dominosOnLeft = scalers.length;
+			var lastDominoOnLeft = leftSide[1]
+			newLeft = newLeft + placedDominoHeight/2
+			if(idBoard[2].length == 0){
+				idBoard[2].push(dominosOnLeft)
+				idBoard[2].push(newLeft)
+				idBoard[2].push(lastDominoOnLeft)
 			}
+			drawDominoDown(domino,idBoard);
+		}else{
+			dominoImage.style.left = newLeft + "px";
+			board.append(dominoImage);
+		}
+	}else{
+		if(newLeft - (placedDominoWidth/2) < 0){
+			var dominosOnLeft = scalers.length;
+			var lastDominoOnLeft = leftSide[1]
+			newLeft = newLeft + placedDominoWidth
+			if(idBoard[2].length == 0){
+				idBoard[2].push(dominosOnLeft)
+				idBoard[2].push(newLeft)
+				idBoard[2].push(lastDominoOnLeft)
+			}
+			drawDominoDown(domino,idBoard);
+		}else{
+			dominoImage.style.left = newLeft + "px";
+			board.append(dominoImage);
 		}
 	}
 }

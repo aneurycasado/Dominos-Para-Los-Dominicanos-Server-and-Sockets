@@ -1,4 +1,4 @@
-var makeHand = function(player,dominoImages){
+function makeHand(player,dominoImages){
 	var hand = [];
 	var player = $(player);
 	var src = dominoImages[dominoImages.length-1].src
@@ -15,11 +15,11 @@ var makeHand = function(player,dominoImages){
 	return hand;
 }
 
-var randomInt = function(number){
+function randomInt(number){
     return Math.floor(Math.random()*number);
 }
 
-var scaleDomino = function(domino){
+function scaleDomino(domino){
 	var windowWidth = $(window).width();
 	var windowHeight = $(window).height();
 	var dominoWidth = (windowWidth/10);
@@ -28,20 +28,20 @@ var scaleDomino = function(domino){
 	domino.height = dominoHeight;
 }
 
-var setUpStartScreen = function(windowWidth,windowHeight){
+function setUpStartScreen(windowWidth,windowHeight){
 	var startScreen = $("#notPressed");
 	startScreen.css({"width":windowWidth.toString(),"height":windowHeight.toString()});
 	return startScreen;
 }
 
-var setUpStartScreenPreesed = function(windowWidth,windowHeight){
+function setUpStartScreenPreesed(windowWidth,windowHeight){
 	var startScreenPressed = $("#pressed");
 	startScreenPressed.css({"width":windowWidth.toString(),"height":windowHeight.toString()});
 	startScreenPressed.hide();
 	return startScreenPressed;
 }
 
-var setUpBoard = function(windowWidth,windowHeight){
+function setUpBoard(windowWidth,windowHeight){
 	var board = $("#board img");
 	var dominoWidth = (windowWidth/10);
 	var dominoHeight = 2*dominoWidth;
@@ -51,7 +51,7 @@ var setUpBoard = function(windowWidth,windowHeight){
 	return board;
 }
 
-var setUpLeftButton = function(windowWidth,windowHeight){
+function setUpLeftButton(windowWidth,windowHeight){
 	var leftButton = $("#leftButton");
 	var width = (windowWidth/4).toString();
 	var height = (windowHeight/3).toString();
@@ -65,7 +65,7 @@ var setUpLeftButton = function(windowWidth,windowHeight){
 	return leftButton
 }
 
-var setUpRightButton = function(windowWidth,windowHeight){
+function setUpRightButton(windowWidth,windowHeight){
 	var rightButton = $("#rightButton");
 	var width = (windowWidth/4).toString();
 	var height = (windowHeight/3).toString();
@@ -79,7 +79,7 @@ var setUpRightButton = function(windowWidth,windowHeight){
 	return rightButton
 }
 
-var setUpWrongMoveButton = function(windowWidth,windowHeight){
+function setUpWrongMoveButton(windowWidth,windowHeight){
 	var wrongMoveButton = $("#wrongMoveButton");
 	var width = (windowWidth/4).toString();
 	var height =(windowHeight/3).toString();
@@ -93,7 +93,7 @@ var setUpWrongMoveButton = function(windowWidth,windowHeight){
 	return wrongMoveButton;
 }
 
-var setUpPassButton = function(windowWidth,windowHeight){
+function setUpPassButton(windowWidth,windowHeight){
 	var passButton = $("#passButton");
 	var width = (windowWidth/4).toString();
 	var height =(windowHeight/3).toString();
@@ -107,7 +107,7 @@ var setUpPassButton = function(windowWidth,windowHeight){
 	return passButton;
 }
 
-var setUpGameOverButton = function(windowWidth,windowHeight){
+function setUpGameOverButton(windowWidth,windowHeight){
 	var gameOverButton = $("#gameOverButton");
 	var width = (windowWidth/4).toString();
 	var height =(windowHeight/3).toString();
@@ -121,7 +121,7 @@ var setUpGameOverButton = function(windowWidth,windowHeight){
 	return gameOverButton;
 }
 
-var hideHands = function(player1,player2,player3,player4){
+function hideHands(player1,player2,player3,player4){
 	player1.hide();
 	player2.hide();
 	player3.hide();
