@@ -856,6 +856,7 @@ var createAdjusterLeft = function(scalers,placedDominoWidth){
 
 var drawDominoDown = function(domino,idBoard){
 	var newLeft = idBoard[2][1]
+
 	var dominoImages = makeDominoImages();
 	var windowWidth = $(window).width();
 	var windowHeight = $(window).height();
