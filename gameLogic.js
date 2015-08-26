@@ -124,26 +124,26 @@ var runGame = function(domino,currentPlayer,idBoard){
 		if(idBoard[0].length == 0){
 			addFirstDominoToBoard(domino,idBoard);
 			domino.remove();
-			//currentPlayer = choseNextPlayer(currentPlayer);
-			//return currentPlayer;
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
 		 }else if(validOnlyOnRight(domino,idBoard)){
 		 	addDominoToTheRight(domino,idBoard);
 		 	domino.remove();
-			//currentPlayer = choseNextPlayer(currentPlayer);
-			//return currentPlayer;
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
 		 }else if(validOnlyOnLeft(domino,idBoard)){
 		 	addDominoToTheLeft(domino,idBoard);
 		 	domino.remove();
-			//currentPlayer = choseNextPlayer(currentPlayer);
-			//return currentPlayer;
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
 		 }else{
 		 	pickDirection(domino,idBoard);
-			//currentPlayer = choseNextPlayer(currentPlayer);
-			//return currentPlayer;
+			currentPlayer = choseNextPlayer(currentPlayer);
+			return currentPlayer;
 		 };
 	}else{
 		wrongMove(currentPlayer);
-		//return currentPlayer;
+		return currentPlayer;
 	};
 }
 

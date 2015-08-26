@@ -84,6 +84,36 @@ var createPlayers = function(){
 	players.push(player4);
   return players;
 };
+
+var checkDomino = function(dominoId,idBoard){
+	if(idBoard[0].length == 0){
+		if(dominoId == "(6,6)"){
+			return true;
+		}else{
+			return false;
+		}
+	}else{
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastLeftDomino = idBoard[0][0];
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+		var firstNumber = lastLeftDomino[1];
+		var secondNumber = lastRightDomino[3];
+		var dominoFirstNumber = dominoId[1];
+		var dominoSecondNumber = dominoId[3];
+		if(dominoFirstNumber  == firstNumber)
+		{
+			return true;
+		}else if(dominoFirstNumber  == secondNumber){
+			return true;
+		}else if(dominoSecondNumber == firstNumber){
+			return true;
+		}else if (dominoSecondNumber == secondNumber){
+		   return true;
+		}else{
+			return false;
+		};
+	};
+}
 var num = 0;
 var sockets = [];
 var players = createPlayers();
@@ -99,9 +129,38 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         console.log("Peace, don't come back");
     });
-    if(num === 4){
+    if(num === 2){
       io.sockets.emit("playersAreAllHere",{});
-      //socket.broadcast.emit("playersAreAllHere",{});
     }
+    socket.on("preparationFinished", function(){
+      console.log("prep works");
+      socket.emit("makeFirstMove",{});
+    });
+    socket.on("moveMade", function(dominoID){
+      // var validMove = checkDomino(dominoId, idBoard);
+      // if(validMove){
+      //   if(idBoard[0].length == 0){
+    	// 		addFirstDominoToBoard(domino,idBoard);
+    	// 	 }else if(validOnlyOnRight(domino,idBoard)){
+    	// 	 	addDominoToTheRight(domino,idBoard);
+    	// 		//currentPlayer = choseNextPlayer(currentPlayer);
+    	// 		//return currentPlayer;
+    	// 	 }else if(validOnlyOnLeft(domino,idBoard)){
+    	// 	 	addDominoToTheLeft(domino,idBoard);
+    	// 		//currentPlayer = choseNextPlayer(currentPlayer);
+    	// 		//return currentPlayer;
+    	// 	 }else{
+    	// 	 	pickDirection(domino,idBoard);
+    	// 	 };
+    	// }else{
+    	// 	wrongMove(currentPlayer);
+    	// 	//return currentPlayer;
+    	// };
+      console.log(dominoID);
+    });
     //socket.emit("playerNum",num);
 });
+// io.on("preparationFinished",function(){
+//   console.log("preps work");
+//   io.sockets.emit("makeFirstMove",{});
+// });

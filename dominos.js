@@ -63,6 +63,7 @@ var scaleDomino = function(domino){
 var player = null;
 var serverHand = null;
 var frontEndHand = null;
+var currentPlayerHand = null;
 $(document).ready(function(){
  		window.resizeTo(1000,1000);
  		var windowWidth = $(window).width();
@@ -90,147 +91,153 @@ $(document).ready(function(){
             frontEndHand = makeFrontEndHand(serverHand,dominoImages);
           });
         });
-        socket.on('playersAreAllHere',function(num){
+        socket.on('playersAreAllHere',function(){
           $(self).fadeOut("slow",function(){
    				     boardImg.show("slow",function(){
    					         currentPlayer = "player" + player.num;
-                     var currentPlayerHand = $("#"+currentPlayer + " #hand");
+                     currentPlayerHand = $("#"+currentPlayer + " #hand");
                      frontEndHand.forEach(function(dominoImage){
                        scaleDomino(dominoImage);
                        currentPlayerHand.append(dominoImage);
                      });
    				    });
    			  });
+          socket.emit("preparationFinished",{});
    		   });
+         socket.on('makeFirstMove',function(){
+           console.log("Make first move works");
+           if(player.first){
+             var selector = "#"+"player" + player.num + " #hand img";
+             $(document).on("click",selector, function(){
+               var domino = this;
+               console.log(this);
+               socket.emit("moveMade",this.id);
+
+             });
+           }
+         });
     });
+		// $("#player1 #hand img").click(function(){
+		// 	socket.on("currentPlayer",function(currentPlayer,idBoard){
+		// 		idBoard = idBoard;
+		// 		drawBoard(idBoard);
+		// 		if(currentPlayer === num)
+		// 	})
+    //
+		// 	if(wrongMoveButton[0].style.display != "none"){
+		// 		//console.log("Please press submit");
+		// 	}else{
+		// 		if(gameLocked(idBoard)){
+		// 			gameOverLocked();
+		// 		}else{
+		// 			if(youCanPlay(currentPlayer,idBoard)){
+		// 				domino = $(this);
+		// 				currentPlayer = runGame(domino,currentPlayer,idBoard);
+		// 				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+		// 					//console.log("Press a button");
+		// 				}else{
+		// 					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// 				}
+		// 			}else{
+		// 				passButton.show();
+		// 			};
+		// 		}
+		// 	};
+		// });
+		// $("#player2 #hand img").click(function(){
+		// 	if(wrongMoveButton[0].style.display != "none"){
+		// 		//console.log("Please press submit");
+		// 	}else{
+		// 		if(gameLocked(idBoard)){
+		// 			gameOverLocked();
+		// 		}else{
+		// 			if(youCanPlay(currentPlayer,idBoard)){
+		// 				domino = $(this);
+		// 				currentPlayer = runGame(domino,currentPlayer,idBoard);
+		// 				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+		// 					//console.log("Press a button");
+		// 				}else{
+		// 					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// 				}
+		// 			}else{
+		// 				passButton.show();
+		// 			};
+		// 		}
+		// 	};
+		// });
+		// $("#player3 #hand img").click(function(){
+		// 	if(wrongMoveButton[0].style.display != "none"){
+		// 		//console.log("Please press submit");
+		// 	}else{
+		// 		if(gameLocked(idBoard)){
+		// 			gameOverLocked();
+		// 		}else{
+		// 			if(youCanPlay(currentPlayer,idBoard)){
+		// 				domino = $(this);
+		// 				currentPlayer = runGame(domino,currentPlayer,idBoard);
+		// 				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+		// 					//console.log("Press a button");
+		// 				}else{
+		// 					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// 				}
+		// 			}else{
+		// 				passButton.show();
+		// 			};
+		// 		}
+		// 	}
+		// });
+		// $("#player4 #hand img").click(function(){
+		// 	if(wrongMoveButton[0].style.display != "none"){
+		// 		//console.log("Please press submit");
+		// 	}else{
+		// 		if(gameLocked(idBoard)){
+		// 			gameOverLocked();
+		// 		}else{
+		// 			if(youCanPlay(currentPlayer,idBoard)){
+		// 				domino = $(this);
+		// 				currentPlayer = runGame(domino,currentPlayer,idBoard);
+		// 				if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
+		// 					//console.log("Press a button");
+		// 				}else{
+		// 					showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// 				}
+		// 			}else{
+		// 				passButton.show();
+		// 			};
+		// 		}
+		// 	};
+		// });
+		// leftButton.click(function(){
+		// 	addDominoToTheLeft(domino,idBoard);
+		// 	domino.remove();
+		// 	$(this).hide();
+		// 	rightButton.hide();
+		// 	showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// });
+		// rightButton.click(function(){
+		// 	addDominoToTheRight(domino,idBoard);
+		// 	domino.remove();
+		// 	$(this).hide();
+		// 	leftButton.hide();
+		// 	showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// });
+		// passButton.click(function(){
+		// 	$(this).hide();
+		// 	currentPlayer = choseNextPlayer(currentPlayer);
+		// 	showCurrentHand(currentPlayer,player1,player2,player3,player4);
+		// });
 });
 
 
 
 
 
-// 		var player1 = $("#player1");
-// 		var player2 = $("#player2");
-// 		var player3 = $("#player3");
-// 		var player4 = $("#player4");
-// 		var currentPlayer = "";
-// 		var idBoard = [[],[],[],[],[],[]];
-// 		var domino = "";
-// 		hideHands(player1,player2,player3,player4);
-// var startGame = function(num){
-// 	console.log("The num " + num);
 
-// 		$("#player1 #hand img").click(function(){
-// 			socket.on("currentPlayer",function(currentPlayer,idBoard){
-// 				idBoard = idBoard;
-// 				drawBoard(idBoard);
-// 				if(currentPlayer === num)
-// 			})
-//
-// 			if(wrongMoveButton[0].style.display != "none"){
-// 				//console.log("Please press submit");
-// 			}else{
-// 				if(gameLocked(idBoard)){
-// 					gameOverLocked();
-// 				}else{
-// 					if(youCanPlay(currentPlayer,idBoard)){
-// 						domino = $(this);
-// 						currentPlayer = runGame(domino,currentPlayer,idBoard);
-// 						if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-// 							//console.log("Press a button");
-// 						}else{
-// 							showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 						}
-// 					}else{
-// 						passButton.show();
-// 					};
-// 				}
-// 			};
-// 		});
-// 		$("#player2 #hand img").click(function(){
-// 			if(wrongMoveButton[0].style.display != "none"){
-// 				//console.log("Please press submit");
-// 			}else{
-// 				if(gameLocked(idBoard)){
-// 					gameOverLocked();
-// 				}else{
-// 					if(youCanPlay(currentPlayer,idBoard)){
-// 						domino = $(this);
-// 						currentPlayer = runGame(domino,currentPlayer,idBoard);
-// 						if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-// 							//console.log("Press a button");
-// 						}else{
-// 							showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 						}
-// 					}else{
-// 						passButton.show();
-// 					};
-// 				}
-// 			};
-// 		});
-// 		$("#player3 #hand img").click(function(){
-// 			if(wrongMoveButton[0].style.display != "none"){
-// 				//console.log("Please press submit");
-// 			}else{
-// 				if(gameLocked(idBoard)){
-// 					gameOverLocked();
-// 				}else{
-// 					if(youCanPlay(currentPlayer,idBoard)){
-// 						domino = $(this);
-// 						currentPlayer = runGame(domino,currentPlayer,idBoard);
-// 						if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-// 							//console.log("Press a button");
-// 						}else{
-// 							showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 						}
-// 					}else{
-// 						passButton.show();
-// 					};
-// 				}
-// 			}
-// 		});
-// 		$("#player4 #hand img").click(function(){
-// 			if(wrongMoveButton[0].style.display != "none"){
-// 				//console.log("Please press submit");
-// 			}else{
-// 				if(gameLocked(idBoard)){
-// 					gameOverLocked();
-// 				}else{
-// 					if(youCanPlay(currentPlayer,idBoard)){
-// 						domino = $(this);
-// 						currentPlayer = runGame(domino,currentPlayer,idBoard);
-// 						if((leftButton[0].style.display != "none") || (rightButton[0].style.display != "none")){
-// 							//console.log("Press a button");
-// 						}else{
-// 							showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 						}
-// 					}else{
-// 						passButton.show();
-// 					};
-// 				}
-// 			};
-// 		});
-// 		leftButton.click(function(){
-// 			addDominoToTheLeft(domino,idBoard);
-// 			domino.remove();
-// 			$(this).hide();
-// 			rightButton.hide();
-// 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 		});
-// 		rightButton.click(function(){
-// 			addDominoToTheRight(domino,idBoard);
-// 			domino.remove();
-// 			$(this).hide();
-// 			leftButton.hide();
-// 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 		});
-// 		passButton.click(function(){
-// 			$(this).hide();
-// 			currentPlayer = choseNextPlayer(currentPlayer);
-// 			showCurrentHand(currentPlayer,player1,player2,player3,player4);
-// 		});
-// 	});
-// //};
+
+
+
+
+
 
 
 //Drawing the board
