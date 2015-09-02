@@ -85,9 +85,9 @@ var createPlayers = function(){
   return players;
 };
 
-var checkDomino = function(dominoId,idBoard){
+var checkDomino = function(dominoID,idBoard){
 	if(idBoard[0].length == 0){
-		if(dominoId == "(6,6)"){
+		if(dominoID == "(6,6)"){
 			return true;
 		}else{
 			return false;
@@ -98,8 +98,8 @@ var checkDomino = function(dominoId,idBoard){
 		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
 		var firstNumber = lastLeftDomino[1];
 		var secondNumber = lastRightDomino[3];
-		var dominoFirstNumber = dominoId[1];
-		var dominoSecondNumber = dominoId[3];
+		var dominoFirstNumber = dominoID[1];
+		var dominoSecondNumber = dominoID[3];
 		if(dominoFirstNumber  == firstNumber)
 		{
 			return true;
@@ -113,11 +113,75 @@ var checkDomino = function(dominoId,idBoard){
 			return false;
 		};
 	};
-}
+};
 var num = 0;
 var sockets = [];
 var players = createPlayers();
 var idBoard = [[],[],[],[],[],[]];
+var currentPlayer = null;
+var addFirstDominoToBoard = function(dominoID,idBoard){
+	addDominoToTheLeft(dominoID,idBoard);
+	addDominoToTheRight(dominoID,idBoard);
+};
+
+var addDominoToTheLeft = function(dominoID,idBoard){
+	var dominoID = orientIdLeft(dominoID,idBoard);
+	idBoard[0].unshift(dominoID);
+};
+
+var addDominoToTheRight = function(dominoID,idBoard){
+	var dominoID = orientIdRight(dominoID,idBoard);
+	idBoard[1].push(dominoID);
+};
+
+var changed = [];
+var notChanged = [];
+
+var orientIdRight = function(dominoID,idBoard){
+	if(idBoard[1].length === 0){
+		return dominoID;
+	}else{
+		var newDominoId = "";
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+		var dominoFirstNumber = dominoID[1];
+		var dominoSecondNumber = dominoID[3];
+		var secondNumber = lastRightDomino[3];
+		if(dominoFirstNumber == secondNumber){
+			notChanged.push(dominoID);
+			return dominoID;
+		}else if(dominoSecondNumber == secondNumber){
+			changed.push(dominoID);
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			return newDominoId;
+		}else{
+			console.log("Houston, we have a problem.");
+		}
+	}
+};
+
+var orientIdLeft = function(dominoID,idBoard){
+	if(idBoard[0].length === 0){
+		return dominoID;
+	}else{
+		var newDominoId = "";
+		var lastLeftDomino = idBoard[0][0];
+		var dominoFirstNumber = dominoID[1];
+		var dominoSecondNumber = dominoID[3];
+		var firstNumber = lastLeftDomino[1];
+		if(dominoFirstNumber == firstNumber){
+			changed.push(dominoID);
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			return newDominoId;
+		}else if(dominoSecondNumber == firstNumber){
+			notChanged.push(dominoID);
+			return dominoID;
+		}else{
+			console.log("Houston, we have a problem.");
+		}
+	}
+};
+
 app.use(express.static(path.join(__dirname, '/')));
 app.get("/",function(req,res){
   res.sendfile(__dirname + '/index.html');
@@ -125,7 +189,7 @@ app.get("/",function(req,res){
 io.on('connection', function (socket) {
     console.log("connected");
     num++;
-    socket.emit("yourHand",players[num-1]);
+    socket.emit("yourHand",players[num-1],(num-1));
     socket.on('disconnect', function () {
         console.log("Peace, don't come back");
     });
@@ -133,16 +197,38 @@ io.on('connection', function (socket) {
       io.sockets.emit("playersAreAllHere",{});
     }
     socket.on("preparationFinished", function(){
-      console.log("prep works");
+      //console.log("prep works");
       socket.emit("makeFirstMove",{});
     });
-    socket.on("moveMade", function(dominoID){
-      // var validMove = checkDomino(dominoId, idBoard);
-      // if(validMove){
-      //   if(idBoard[0].length == 0){
-    	// 		addFirstDominoToBoard(domino,idBoard);
-    	// 	 }else if(validOnlyOnRight(domino,idBoard)){
-    	// 	 	addDominoToTheRight(domino,idBoard);
+    socket.on("firstMoveMade", function(dominoID,firstPlayer){
+      var validMove = checkDomino(dominoID, idBoard);
+      //console.log(validMove);
+      if(validMove){
+          currentPlayer = firstPlayer;
+          addFirstDominoToBoard(dominoID,idBoard);
+          console.log("We are in moveMade");
+          idBoard.changed = changed;
+          idBoard.notChanged = notChanged;
+          io.sockets.emit("firstMoveSaved",idBoard);
+        }//else if(validOnlyOnRight(domino,idBoard)){
+    });
+    socket.on("firstPlayerDone", function(num){
+      console.log("Last player to play " + currentPlayer);
+      var nextPlayer = (currentPlayer + 1) % 2;
+      console.log("Next player to play " + nextPlayer);
+      socket.emit("nextPlayer",nextPlayer);
+    });
+    socket.on("nextMoveMade", function(dominoId,nextPlayer){
+      currentPlayer = nextPlayer;
+      socket.emit('nextMoveSaved',idBoard);
+    });
+    socket.on('nextPlayerDone', function(){
+      var nextPlayer = (currentPlayer + 1) % 2;
+      console.log("Next player to play " + nextPlayer);
+      socket.emit("nextPlayer",nextPlayer);
+    });
+
+    // 	 	addDominoToTheRight(domino,idBoard);
     	// 		//currentPlayer = choseNextPlayer(currentPlayer);
     	// 		//return currentPlayer;
     	// 	 }else if(validOnlyOnLeft(domino,idBoard)){
@@ -156,8 +242,6 @@ io.on('connection', function (socket) {
     	// 	wrongMove(currentPlayer);
     	// 	//return currentPlayer;
     	// };
-      console.log(dominoID);
-    });
     //socket.emit("playerNum",num);
 });
 // io.on("preparationFinished",function(){
