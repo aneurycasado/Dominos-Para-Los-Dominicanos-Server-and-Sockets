@@ -229,6 +229,18 @@ $(document).ready(function(){
              });
            }
          });
+				 socket.on('wrongFirstMove',function(){
+					console.log("wrongMove");
+					if(player.first){
+						 var selector = "#"+"player" + player.num + " #hand img";
+						 $(document).off("click");
+						 $(document).on("click",selector, function(){
+							 currentDomino = this;
+							 console.log("The first move: ", this);
+							 socket.emit("firstMoveMade",this.id,playerNum);
+						 });
+					 }
+				 });
          socket.on('firstMoveSaved', function(board){
            drawFirstDomino(board);
 					 $(currentDomino).remove();
@@ -241,6 +253,18 @@ $(document).ready(function(){
 						 console.log("The nextPlayer " +playerNum);
 						 var selector = "#"+"player" + player.num + " #hand img";
              $(document).on("click",selector, function(){
+               currentDomino = this;
+               console.log(this);
+               socket.emit("nextMoveMade",this.id,playerNum);
+             });
+					 }
+				 });
+				 socket.on("wrongNextMove", function(nextPlayer){
+					 if(nextPlayer === playerNum){
+						 console.log("Wrongmove " +playerNum);
+						 var selector = "#"+"player" + player.num + " #hand img";
+             $(document).off("click");
+						 $(document).on("click",selector, function(){
                currentDomino = this;
                console.log(this);
                socket.emit("nextMoveMade",this.id,playerNum);

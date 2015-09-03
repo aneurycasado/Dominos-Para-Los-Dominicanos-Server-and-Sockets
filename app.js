@@ -204,7 +204,6 @@ io.on('connection', function (socket) {
     });
     socket.on("firstMoveMade", function(dominoID,firstPlayer){
       var validMove = checkDomino(dominoID, idBoard);
-      //console.log(validMove);
       if(validMove){
           currentPlayer = firstPlayer;
           addFirstDominoToBoard(dominoID,idBoard);
@@ -212,7 +211,9 @@ io.on('connection', function (socket) {
           idBoard.changed = changed;
           idBoard.notChanged = notChanged;
           io.sockets.emit("firstMoveSaved",idBoard);
-        }//else if(validOnlyOnRight(domino,idBoard)){
+        }else{
+          io.sockets.emit("wrongFirstMove", {});
+        }
     });
     socket.on("firstPlayerDone", function(num){
       console.log("Last player to play " + currentPlayer);
@@ -220,9 +221,14 @@ io.on('connection', function (socket) {
       console.log("Next player to play " + nextPlayer);
       socket.emit("nextPlayer",nextPlayer);
     });
-    socket.on("nextMoveMade", function(dominoId,nextPlayer){
+    socket.on("nextMoveMade", function(dominoID,nextPlayer){
       currentPlayer = nextPlayer;
-      socket.emit('nextMoveSaved',idBoard);
+      var validMove = checkDomino(dominoID, idBoard);
+      if(validMove){
+        socket.emit('nextMoveSaved',idBoard);
+      }else{
+        io.sockets.emit('wrongNextMove',nextPlayer);
+      }
     });
     socket.on('nextPlayerDone', function(){
       var nextPlayer = (currentPlayer + 1) % 2;
