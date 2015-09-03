@@ -105,14 +105,14 @@ var drawDominoOnRightSide = function(domino,idBoard){
 	dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight)
 	var adjuster = createAdjusterRight(scalers,placedDominoWidth);
 	var newLeft = leftWide + adjuster - placedDominoWidth/2;
-	if(domino.hasClass("changed")){
-		if(dominoId[1] != dominoId[3]){
+	if(idBoard.changed.indexOf(dominoID) !== -1){
+		if(dominoId[1] !== dominoId[3]){
 			dominoImage.className = "rotated90";
 		}else{
 			newLeft = leftWide + adjuster
 		}
-	}else if(domino.hasClass("notChanged")){
-		if(dominoId[1] != dominoId[3]){
+	}else if(idBoard.notChanged.indexOf(dominoID) !== -1){
+		if(dominoId[1] !== dominoId[3]){
 			dominoImage.className = "rotate270";
 		}else{
 			newLeft = leftWide + adjuster
@@ -134,42 +134,42 @@ var drawDominoOnRightSide = function(domino,idBoard){
 		}
 	}else{
 		if(newLeft + placedDominoWidth > windowWidth){
-			var dominosOnRight = rightSideLength
-			var lastDominoOnRight = rightSide[rightSideLength-2]
-			if(idBoard[3].length == 0){
-				idBoard[3].push(dominosOnRight)
-				idBoard[3].push(newLeft)
-				idBoard[3].push(lastDominoOnRight)
+			var dominosOnRight = rightSideLength;
+			var lastDominoOnRight = rightSide[rightSideLength-2];
+			if(idBoard[3].length === 0){
+				idBoard[3].push(dominosOnRight);
+				idBoard[3].push(newLeft);
+				idBoard[3].push(lastDominoOnRight);
 			}
-			drawDominosUp(domino,idBoard)
+			drawDominosUp(domino,idBoard);
 		}else{
 			dominoImage.style.left = newLeft + "px";
 			board.append(dominoImage);
 		}
 	}
-}
+};
 
 var createScalersRight = function(rightSide){
-	var scalers = []
+	var scalers = [];
 	for(var x = 0; x < rightSide.length; x++){
-		var currentDominoId = rightSide[x]
+		var currentDominoId = rightSide[x];
 		if(currentDominoId[1] == currentDominoId[3]){
-			scalers.push(1)
+			scalers.push(1);
 		}else{
-			scalers.push(2)
+			scalers.push(2);
 		}
 	}
-	return scalers
-}
+	return scalers;
+};
 
 var createAdjusterRight = function(scalers,placedDominoWidth){
-	var adjuster = 0
+	var adjuster = 0;
 	for(var x=1;x<scalers.length;x++){
 		var newWide = scalers[x]*placedDominoWidth;
 		adjuster += newWide;
 	}
-	return adjuster
-}
+	return adjuster;
+};
 
 var drawBoard = function(board){
   //drawFirstDomino(board);
@@ -219,12 +219,12 @@ $(document).ready(function(){
           socket.emit("preparationFinished",{});
    		   });
          socket.on('makeFirstMove',function(){
-           console.log("Make first move works");
-           if(player.first){
+           console.log("MakeFirstMove");
+					 if(player.first){
              var selector = "#"+"player" + player.num + " #hand img";
              $(document).on("click",selector, function(){
                currentDomino = this;
-               console.log(this);
+               console.log("The first move: ", this);
                socket.emit("firstMoveMade",this.id,playerNum);
              });
            }
@@ -232,11 +232,13 @@ $(document).ready(function(){
          socket.on('firstMoveSaved', function(board){
            drawFirstDomino(board);
 					 $(currentDomino).remove();
-           socket.emit('firstPlayerDone',playerNum);
+					 $(document).off("click");
+					 console.log("This player can not click anymore");
+					 socket.emit('firstPlayerDone',playerNum);
          });
 				 socket.on("nextPlayer", function(nextPlayer){
 					 if(nextPlayer === playerNum){
-						 console.log("The nextPlayer");
+						 console.log("The nextPlayer " +playerNum);
 						 var selector = "#"+"player" + player.num + " #hand img";
              $(document).on("click",selector, function(){
                currentDomino = this;
@@ -247,12 +249,10 @@ $(document).ready(function(){
 				 });
 				 socket.on("nextMoveSaved", function(board){
 					var selector = "#"+"player" + player.num + " #hand img";
-					$(document).off("click",selector);
-					console.log(currentDomino);
+					$(document).off("click");
+					console.log("Next move saved", currentDomino);
 					$(currentDomino).remove();
-					 socket.emit('nextPlayerDone',{});
-					 console.log("nextMoveSaved");
-					 console.log(board);
+					socket.emit('nextPlayerDone',{});
 				 });
     });
 		// $("#player1 #hand img").click(function(){

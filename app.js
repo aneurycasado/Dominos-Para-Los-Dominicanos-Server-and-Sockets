@@ -100,25 +100,21 @@ var checkDomino = function(dominoID,idBoard){
 		var secondNumber = lastRightDomino[3];
 		var dominoFirstNumber = dominoID[1];
 		var dominoSecondNumber = dominoID[3];
-		if(dominoFirstNumber  == firstNumber)
+		if(dominoFirstNumber  === firstNumber)
 		{
 			return true;
-		}else if(dominoFirstNumber  == secondNumber){
+		}else if(dominoFirstNumber  === secondNumber){
 			return true;
-		}else if(dominoSecondNumber == firstNumber){
+		}else if(dominoSecondNumber === firstNumber){
 			return true;
-		}else if (dominoSecondNumber == secondNumber){
+		}else if (dominoSecondNumber === secondNumber){
 		   return true;
 		}else{
 			return false;
 		};
 	};
 };
-var num = 0;
-var sockets = [];
-var players = createPlayers();
-var idBoard = [[],[],[],[],[],[]];
-var currentPlayer = null;
+
 var addFirstDominoToBoard = function(dominoID,idBoard){
 	addDominoToTheLeft(dominoID,idBoard);
 	addDominoToTheRight(dominoID,idBoard);
@@ -169,7 +165,7 @@ var orientIdLeft = function(dominoID,idBoard){
 		var dominoFirstNumber = dominoID[1];
 		var dominoSecondNumber = dominoID[3];
 		var firstNumber = lastLeftDomino[1];
-		if(dominoFirstNumber == firstNumber){
+		if(dominoFirstNumber === firstNumber){
 			changed.push(dominoID);
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
 			return newDominoId;
@@ -181,6 +177,12 @@ var orientIdLeft = function(dominoID,idBoard){
 		}
 	}
 };
+
+var num = 0;
+var sockets = [];
+var players = createPlayers();
+var idBoard = [[],[],[],[],[],[]];
+var currentPlayer = null;
 
 app.use(express.static(path.join(__dirname, '/')));
 app.get("/",function(req,res){
@@ -225,7 +227,7 @@ io.on('connection', function (socket) {
     socket.on('nextPlayerDone', function(){
       var nextPlayer = (currentPlayer + 1) % 2;
       console.log("Next player to play " + nextPlayer);
-      socket.emit("nextPlayer",nextPlayer);
+      io.sockets.emit("nextPlayer",nextPlayer);
     });
 
     // 	 	addDominoToTheRight(domino,idBoard);
