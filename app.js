@@ -141,11 +141,11 @@ var orientIdLeft = function(dominoID){
 		if(dominoFirstNumber === firstNumber){
 			changed.push(dominoID);
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
-			idBoard["changed"] = changed;
+			idBoard[7] = changed;
       return newDominoId;
 		}else if(dominoSecondNumber === firstNumber){
 			notChanged.push(dominoID);
-			idBoard["notChanged"] = notChanged;
+			idBoard[6] = notChanged;
       return dominoID;
 		}
 	}
@@ -172,12 +172,12 @@ var orientIdRight = function(dominoID){
 		var secondNumber = lastRightDomino[3];
 		if(dominoFirstNumber == secondNumber){
 			notChanged.push(dominoID);
-			idBoard["notChanged"] = notChanged;
+			idBoard[6] = notChanged;
       return dominoID;
 		}else if(dominoSecondNumber == secondNumber){
 			changed.push(dominoID);
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
-			idBoard["changed"] = changed;
+			idBoard[7] = changed;
       return newDominoId;
 		}else{
 			console.log("Houston, we have a problem.");
@@ -248,9 +248,7 @@ var removeDomino = function(dominoID){
 var num = 0;
 var sockets = [];
 var players = createPlayers();
-var idBoard = [[],[],[],[],[],[]];
-idBoard["changed"] = [];
-idBoard["notChanged"] = [];
+var idBoard = [[],[],[],[],[],[],[],[]];
 var currentPlayer = null;
 
 app.use(express.static(path.join(__dirname, '/')));
@@ -323,6 +321,7 @@ io.on('connection', function (socket) {
         }else{
           direction = "both";
         }
+        console.log(idBoard);
         socket.emit('nextMoveSaved',idBoard,direction,dominoID);
       }else{
         io.sockets.emit('wrongNextMove',nextPlayer);
@@ -339,7 +338,8 @@ io.on('connection', function (socket) {
       socket.emit('nextMoveSaved', idBoard, direction,dominoID);
     });
 
-    socket.on('nextPlayerDone', function(){
+    socket.on('nextPlayerDone', function(dominoID,direction,board){
+      io.sockets.emit('updateBoard',dominoID,direction,board);
       var nextPlayer = (currentPlayer + 1) % 2;
       if(nextPlayerCanPlay(nextPlayer,idBoard)){
         io.sockets.emit("nextPlayer",nextPlayer);

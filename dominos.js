@@ -87,91 +87,6 @@ var drawFirstDomino = function(){
 	board.append(dominoImage);
 };
 
-var drawDominoOnRightSide = function(domino){
-	var dominoImages = makeDominoImages();
-	var windowWidth = $(window).width();
-	var windowHeight = $(window).height();
-	var dominoWidth = (windowWidth/10);
-	var dominoHeight = 2*dominoWidth;
-	var placedDominoWidth = dominoWidth / 2;
-	var placedDominoHeight = 2 * placedDominoWidth;
-	var topHeight =  (windowHeight/2 - 1.5*placedDominoHeight) + "px";
-	var leftWide = windowWidth/2 - placedDominoWidth/2;
-	var rightSide = idBoard[1];
-	var board = $("#board");
-	var scalers = createScalersRight(rightSide);
-	var dominoId = domino[0].id;
-	var rightSideLength = rightSide.length;
-	var dominoImage = findDominoImage(dominoId,dominoImages);
-	dominoImage = setDominoImage(dominoImage,placedDominoWidth,placedDominoHeight,topHeight);
-	var adjuster = createAdjusterRight(scalers,placedDominoWidth);
-	var newLeft = leftWide + adjuster - placedDominoWidth/2;
-	if(idBoard.changed.indexOf(dominoID) !== -1){
-		if(dominoId[1] !== dominoId[3]){
-			dominoImage.className = "rotated90";
-		}else{
-			newLeft = leftWide + adjuster;
-		}
-	}else if(idBoard.notChanged.indexOf(dominoID) !== -1){
-		if(dominoId[1] !== dominoId[3]){
-			dominoImage.className = "rotate270";
-		}else{
-			newLeft = leftWide + adjuster;
-		}
-	}
-	if(dominoId[1] != dominoId[3]){
-		if(newLeft + placedDominoHeight > windowWidth){
-			var dominosOnRight = rightSideLength;
-			var lastDominoOnRight = rightSide[rightSideLength-2];
-			if(idBoard[3].length === 0){
-				idBoard[3].push(dominosOnRight);
-				idBoard[3].push(newLeft);
-				idBoard[3].push(lastDominoOnRight);
-			}
-			drawDominosUp(domino,idBoard);
-		}else{
-			dominoImage.style.left = newLeft + "px";
-			board.append(dominoImage);
-		}
-	}else{
-		if(newLeft + placedDominoWidth > windowWidth){
-			var dominosOnRight = rightSideLength;
-			var lastDominoOnRight = rightSide[rightSideLength-2];
-			if(idBoard[3].length === 0){
-				idBoard[3].push(dominosOnRight);
-				idBoard[3].push(newLeft);
-				idBoard[3].push(lastDominoOnRight);
-			}
-			drawDominosUp(domino,idBoard);
-		}else{
-			dominoImage.style.left = newLeft + "px";
-			board.append(dominoImage);
-		}
-	}
-};
-
-var createScalersRight = function(rightSide){
-	var scalers = [];
-	for(var x = 0; x < rightSide.length; x++){
-		var currentDominoId = rightSide[x];
-		if(currentDominoId[1] == currentDominoId[3]){
-			scalers.push(1);
-		}else{
-			scalers.push(2);
-		}
-	}
-	return scalers;
-};
-
-var createAdjusterRight = function(scalers,placedDominoWidth){
-	var adjuster = 0;
-	for(var x=1;x<scalers.length;x++){
-		var newWide = scalers[x]*placedDominoWidth;
-		adjuster += newWide;
-	}
-	return adjuster;
-};
-
 var drawBoard = function(){
   //drawFirstDomino(board);
   console.log(idBoard);
@@ -194,20 +109,14 @@ $(document).ready(function(){
  		var passButton = setUpPassButton(windowWidth,windowHeight);
  		var gameOverButton = setUpGameOverButton(windowWidth,windowHeight);
 
-
-
 		startScreen.hover(function(){
  			$(this).hide();
  			startScreenPressed.show();
  		});
 
-
-
 		startScreenPressed.click(function(){
         var self = this;
         var socket = io(window.location.origin);
-
-
 
 				socket.on('connect', function () {
           socket.on('yourHand', function(newPlayer,num){
@@ -217,8 +126,6 @@ $(document).ready(function(){
             frontEndHand = makeFrontEndHand(serverHand,dominoImages);
           });
         });
-
-
 
         socket.on('playersAreAllHere',function(){
           $(self).fadeOut("slow",function(){
@@ -234,8 +141,6 @@ $(document).ready(function(){
           socket.emit("preparationFinished",{});
    		   });
 
-
-
          socket.on('makeFirstMove',function(){
 					 if(player.first){
 						 console.log("MakeFirstMove");
@@ -248,8 +153,6 @@ $(document).ready(function(){
 						 //Animations for waiting
            }
          });
-
-
 
 				 socket.on('firstMoveSaved', function(board){
 					 idBoard = board;
@@ -285,19 +188,16 @@ $(document).ready(function(){
 				 });
 
 
-
 				 socket.on("youCanNotPlay",function(currentPlayer){
 					 if(currentPlayer === playerNum){
 						 console.log("Can not play");
 						 passButton.show();
 						 $(document).on('click','#passButton',function(){
-							 console.log(this);
 							 passButton.hide();
 							 socket.emit("iCantPlay", playerNum);
 						 });
 					 }
 				 });
-
 
 
 				 socket.on("wrongNextMove", function(nextPlayer){
@@ -314,8 +214,6 @@ $(document).ready(function(){
 				 });
 
 				 socket.on("nextMoveSaved", function(board,direction,dominoID){
-						idBoard = board;
-						drawBoard();
 						var selector = "#"+"player" + player.num + " #hand img";
 						$(document).off("click");
 						if(direction === "both"){
@@ -333,11 +231,21 @@ $(document).ready(function(){
 							});
 						}else if(direction === "left"){
 							$(currentDomino).remove();
-							socket.emit('nextPlayerDone',{});
+							socket.emit('nextPlayerDone',dominoID,direction,board);
 						}else if(direction === "right"){
 							$(currentDomino).remove();
-							socket.emit('nextPlayerDone',{});
+							socket.emit('nextPlayerDone',dominoID,direction,board);
 						}
+				 });
+
+				 socket.on('updateBoard', function(dominoID,direction,board){
+					 console.log("UpdateBoard");
+					 idBoard = board;
+					 if(direction === "right"){
+						 drawDominoOnRightSide(dominoID);
+					 }else if(direction === "left"){
+						 drawDominoOnLeftSide(dominoID);
+					 }
 				 });
     });
 });
