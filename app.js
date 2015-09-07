@@ -48,17 +48,21 @@ var makeDominoImages = function(){
            ];
     return dominoImages;
 };
+
+//For each on dominosImages and then pick a random player and assign them
+//the domino
+
 var randomInt = function(number){
     return Math.floor(Math.random()*number);
 };
 
 var makeHand = function(dominoImages){
 	var player = {hand:[],first:false};
-	var doubleSix = "(6,6)"
+	var doubleSix = "(6,6)";
 	for(x = 0;x<7;x++){
 		var ranInt = randomInt(dominoImages.length);
 		var domino = dominoImages[ranInt];
-		if(domino.id == doubleSix){
+		if(domino.id === doubleSix){
 			player.first = true;
 		}
     player.hand.push(domino);
@@ -86,8 +90,8 @@ var createPlayers = function(){
 };
 
 var checkDomino = function(dominoID,idBoard){
-	if(idBoard[0].length == 0){
-		if(dominoID == "(6,6)"){
+	if(idBoard[0].length === 0){
+		if(dominoID === "(6,6)"){
 			return true;
 		}else{
 			return false;
@@ -111,52 +115,21 @@ var checkDomino = function(dominoID,idBoard){
 		   return true;
 		}else{
 			return false;
-		};
-	};
-};
-
-var addFirstDominoToBoard = function(dominoID,idBoard){
-	addDominoToTheLeft(dominoID,idBoard);
-	addDominoToTheRight(dominoID,idBoard);
-};
-
-var addDominoToTheLeft = function(dominoID,idBoard){
-	var dominoID = orientIdLeft(dominoID,idBoard);
-	idBoard[0].unshift(dominoID);
-};
-
-var addDominoToTheRight = function(dominoID,idBoard){
-	var dominoID = orientIdRight(dominoID,idBoard);
-	idBoard[1].push(dominoID);
-};
-
-var changed = [];
-var notChanged = [];
-
-var orientIdRight = function(dominoID,idBoard){
-	if(idBoard[1].length === 0){
-		return dominoID;
-	}else{
-		var newDominoId = "";
-		var numberOfDominosOnRight = idBoard[1].length-1;
-		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
-		var dominoFirstNumber = dominoID[1];
-		var dominoSecondNumber = dominoID[3];
-		var secondNumber = lastRightDomino[3];
-		if(dominoFirstNumber == secondNumber){
-			notChanged.push(dominoID);
-			return dominoID;
-		}else if(dominoSecondNumber == secondNumber){
-			changed.push(dominoID);
-			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
-			return newDominoId;
-		}else{
-			console.log("Houston, we have a problem.");
 		}
 	}
 };
 
-var orientIdLeft = function(dominoID,idBoard){
+var addFirstDominoToBoard = function(dominoID){
+	addDominoToTheLeft(dominoID);
+	addDominoToTheRight(dominoID);
+};
+
+var addDominoToTheLeft = function(dominoID){
+	var newDominoID = orientIdLeft(dominoID);
+	idBoard[0].unshift(newDominoID);
+};
+
+var orientIdLeft = function(dominoID){
 	if(idBoard[0].length === 0){
 		return dominoID;
 	}else{
@@ -168,20 +141,116 @@ var orientIdLeft = function(dominoID,idBoard){
 		if(dominoFirstNumber === firstNumber){
 			changed.push(dominoID);
 			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
-			return newDominoId;
-		}else if(dominoSecondNumber == firstNumber){
+			idBoard["changed"] = changed;
+      return newDominoId;
+		}else if(dominoSecondNumber === firstNumber){
 			notChanged.push(dominoID);
-			return dominoID;
+			idBoard["notChanged"] = notChanged;
+      return dominoID;
+		}
+	}
+};
+
+
+var addDominoToTheRight = function(dominoID){
+	var newDominoID = orientIdRight(dominoID);
+	idBoard[1].push(newDominoID);
+};
+
+var changed = [];
+var notChanged = [];
+
+var orientIdRight = function(dominoID){
+	if(idBoard[1].length === 0){
+		return dominoID;
+	}else{
+		var newDominoId = "";
+		var numberOfDominosOnRight = idBoard[1].length-1;
+		var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+		var dominoFirstNumber = dominoID[1];
+		var dominoSecondNumber = dominoID[3];
+		var secondNumber = lastRightDomino[3];
+		if(dominoFirstNumber == secondNumber){
+			notChanged.push(dominoID);
+			idBoard["notChanged"] = notChanged;
+      return dominoID;
+		}else if(dominoSecondNumber == secondNumber){
+			changed.push(dominoID);
+			newDominoId = "(" + dominoSecondNumber +","+dominoFirstNumber+")";
+			idBoard["changed"] = changed;
+      return newDominoId;
 		}else{
 			console.log("Houston, we have a problem.");
 		}
 	}
 };
 
+var validOnlyOnRight = function(dominoID){
+	var lastLeftDomino = idBoard[0][0];
+	var firstNumber = lastLeftDomino[1];
+	var dominoFirstNumber = dominoID[1];
+	var dominoSecondNumber = dominoID[3];
+	if(dominoFirstNumber != firstNumber && dominoSecondNumber != firstNumber){
+		return true;
+	}else{
+		return false;
+	}
+};
+
+var validOnlyOnLeft = function(dominoID){
+	var numberOfDominosOnRight = idBoard[1].length-1;
+	var lastRightDomino = idBoard[1][numberOfDominosOnRight];
+	var secondNumber = lastRightDomino[3];
+	var dominoFirstNumber = dominoID[1];
+	var dominoSecondNumber = dominoID[3];
+	if(dominoFirstNumber !== secondNumber && dominoSecondNumber !== secondNumber){
+		return true;
+	}else{
+		return false;
+	}
+};
+
+function nextPlayerCanPlay(nextPlayer){
+	if(idBoard[0].length === 0){
+		// console.log("1");
+    return true;
+	}else{
+		var nextPlayerHand = players[nextPlayer].hand;
+    // console.log("NextPlayerHand");
+    // console.log(nextPlayerHand);
+    // console.log("Board");
+    // console.log(idBoard);
+    var canPlay = false;
+    nextPlayerHand.forEach(function(domino){
+      var dominoID = domino.id;
+      if(checkDomino(dominoID,idBoard)){
+				// console.log("Can play with this one");
+        // console.log(dominoID);
+        canPlay = true;
+			}
+    });
+		return canPlay;
+	}
+}
+
+var removeDomino = function(dominoID){
+  var theCurrentPlayer = players[currentPlayer];
+  var removalIndex = -1;
+  theCurrentPlayer.hand.forEach(function(domino,index){
+    if(domino.id === dominoID){
+      removalIndex = index;
+    }
+  });
+  if(removalIndex > -1) theCurrentPlayer.hand.splice(removalIndex,1);
+  players[currentPlayer] = theCurrentPlayer;
+}
+
 var num = 0;
 var sockets = [];
 var players = createPlayers();
 var idBoard = [[],[],[],[],[],[]];
+idBoard["changed"] = [];
+idBoard["notChanged"] = [];
 var currentPlayer = null;
 
 app.use(express.static(path.join(__dirname, '/')));
@@ -192,48 +261,102 @@ io.on('connection', function (socket) {
     console.log("connected");
     num++;
     socket.emit("yourHand",players[num-1],(num-1));
+
+
+
     socket.on('disconnect', function () {
         console.log("Peace, don't come back");
     });
+
+
+
     if(num === 2){
       io.sockets.emit("playersAreAllHere",{});
     }
+
+
+
     socket.on("preparationFinished", function(){
       //console.log("prep works");
       socket.emit("makeFirstMove",{});
     });
+
+
+
     socket.on("firstMoveMade", function(dominoID,firstPlayer){
       var validMove = checkDomino(dominoID, idBoard);
       if(validMove){
           currentPlayer = firstPlayer;
-          addFirstDominoToBoard(dominoID,idBoard);
-          console.log("We are in moveMade");
-          idBoard.changed = changed;
-          idBoard.notChanged = notChanged;
+          addFirstDominoToBoard(dominoID);
           io.sockets.emit("firstMoveSaved",idBoard);
         }else{
           io.sockets.emit("wrongFirstMove", {});
         }
     });
+
+
+
     socket.on("firstPlayerDone", function(num){
-      console.log("Last player to play " + currentPlayer);
+      removeDomino("(6,6)");
       var nextPlayer = (currentPlayer + 1) % 2;
-      console.log("Next player to play " + nextPlayer);
-      socket.emit("nextPlayer",nextPlayer);
+      if(nextPlayerCanPlay(nextPlayer,idBoard)){
+        io.sockets.emit("nextPlayer",nextPlayer);
+      }else{
+        io.sockets.emit('youCanNotPlay',nextPlayer);
+      }
     });
+
+
+
     socket.on("nextMoveMade", function(dominoID,nextPlayer){
       currentPlayer = nextPlayer;
       var validMove = checkDomino(dominoID, idBoard);
+      var direction = null;
       if(validMove){
-        socket.emit('nextMoveSaved',idBoard);
+        removeDomino(dominoID);
+        if(validOnlyOnLeft(dominoID)){
+          direction = "left";
+          addDominoToTheLeft(dominoID);
+        }else if(validOnlyOnRight(dominoID)){
+          direction = "right";
+          addDominoToTheRight(dominoID);
+        }else{
+          direction = "both";
+        }
+        socket.emit('nextMoveSaved',idBoard,direction,dominoID);
       }else{
         io.sockets.emit('wrongNextMove',nextPlayer);
       }
     });
+
+    socket.on("sideChosen", function(direction,dominoID){
+      if(direction === "left"){
+        addDominoToTheLeft(dominoID);
+      }
+      else if(direction === "right"){
+        addDominoToTheRight(dominoID);
+      }
+      socket.emit('nextMoveSaved', idBoard, direction,dominoID);
+    });
+
     socket.on('nextPlayerDone', function(){
       var nextPlayer = (currentPlayer + 1) % 2;
-      console.log("Next player to play " + nextPlayer);
-      io.sockets.emit("nextPlayer",nextPlayer);
+      if(nextPlayerCanPlay(nextPlayer,idBoard)){
+        io.sockets.emit("nextPlayer",nextPlayer);
+      }else{
+        io.sockets.emit('youCanNotPlay',nextPlayer);
+      }
+    });
+
+
+
+    socket.on('iCantPlay', function(nextPlayer){
+      var nextPlayer = (nextPlayer +1) %2;
+      if(nextPlayerCanPlay(nextPlayer,idBoard)){
+        io.sockets.emit("nextPlayer",nextPlayer);
+      }else{
+        io.sockets.emit('youCanNotPlay',nextPlayer);
+      }
     });
 
     // 	 	addDominoToTheRight(domino,idBoard);
