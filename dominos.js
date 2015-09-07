@@ -289,7 +289,12 @@ $(document).ready(function(){
 				 socket.on("youCanNotPlay",function(currentPlayer){
 					 if(currentPlayer === playerNum){
 						 console.log("Can not play");
-						 socket.emit("iCantPlay", playerNum);
+						 passButton.show();
+						 $(document).on('click','#passButton',function(){
+							 console.log(this);
+							 passButton.hide();
+							 socket.emit("iCantPlay", playerNum);
+						 });
 					 }
 				 });
 
